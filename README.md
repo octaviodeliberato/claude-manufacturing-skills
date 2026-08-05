@@ -25,7 +25,7 @@ See [`skills/pid-generator/examples/`](skills/pid-generator/examples) for sample
 **As a plugin (recommended).** Adds the skills to Claude Code and keeps them updated with `git pull` on your side:
 
 ```
-/plugin marketplace add <your-github-username>/claude-manufacturing-skills
+/plugin marketplace add ScottDuncanAI/claude-manufacturing-skills
 /plugin install pid-generator@chem-mfg-skills
 ```
 
