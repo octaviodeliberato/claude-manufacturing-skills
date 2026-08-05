@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Render scratch — generated while iterating on a drawing, not part of a skill
+/preview.png
+/zoom.png
+/out.svg
+/output/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

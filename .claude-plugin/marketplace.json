@@ -1,0 +1,32 @@
+{
+  "name": "chem-mfg-skills",
+  "description": "Claude Skills for chemical manufacturing and process engineering",
+  "owner": {
+    "name": "Scott Duncan",
+    "email": "srduncan14@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "chem-mfg-skills-all",
+      "displayName": "Chemical Manufacturing Skills (all)",
+      "source": "./",
+      "skills": ["./skills/"],
+      "strict": false,
+      "description": "Every skill in the collection. Install this to get all current and future skills in one go.",
+      "category": "process-engineering",
+      "tags": ["chemical-engineering", "manufacturing", "process-engineering"],
+      "license": "MIT"
+    },
+    {
+      "name": "pid-generator",
+      "displayName": "P&ID Generator",
+      "source": "./",
+      "skills": ["./skills/pid-generator"],
+      "strict": false,
+      "description": "Conceptual P&IDs as editable SVG: ISA-5.1 instrumentation, closed control loops, and a layout with no crossed process lines.",
+      "category": "process-engineering",
+      "tags": ["p&id", "pfd", "diagram", "isa-5.1", "process-control", "svg"],
+      "license": "MIT"
+    }
+  ]
+}
