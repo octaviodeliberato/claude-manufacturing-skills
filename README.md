@@ -12,9 +12,9 @@ Everything here produces **conceptual, engineering-support output**. Every outpu
 
 | Skill | Produces | Triggers on |
 |---|---|---|
-| [`pid-generator`](skills/pid-generator) | A conceptual P&ID as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing P&ID SVG |
+| [`pfd-generator`](skills/pfd-generator) | A conceptual P&ID as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing P&ID SVG |
 
-See [`skills/pid-generator/examples/`](skills/pid-generator/examples) for sample output.
+See [`skills/pfd-generator/examples/`](skills/pfd-generator/examples) for sample output.
 
 ## Install
 
@@ -22,7 +22,7 @@ See [`skills/pid-generator/examples/`](skills/pid-generator/examples) for sample
 
 ```
 /plugin marketplace add ScottDuncanAI/claude-manufacturing-skills
-/plugin install pid-generator@chem-mfg-skills
+/plugin install pfd-generator@chem-mfg-skills
 ```
 
 Use `/plugin install chem-mfg-skills-all@chem-mfg-skills` to get every skill in the collection, including ones added later.
@@ -30,13 +30,13 @@ Use `/plugin install chem-mfg-skills-all@chem-mfg-skills` to get every skill in 
 **Manually, for yourself.** Copy any skill folder into your personal skills directory:
 
 ```bash
-cp -r skills/pid-generator ~/.claude/skills/
+cp -r skills/pfd-generator ~/.claude/skills/
 ```
 
 **Manually, for a project.** Copy it into the project so everyone working in that repo gets it:
 
 ```bash
-cp -r skills/pid-generator <your-project>/.claude/skills/
+cp -r skills/pfd-generator <your-project>/.claude/skills/
 ```
 
 Restart Claude Code after copying. Some skills carry Python dependencies — check for a `scripts/requirements.txt` inside the skill folder.
@@ -54,7 +54,7 @@ Practically: you don't invoke a skill. You describe your problem, and the right 
 ├── .claude-plugin/
 │   └── marketplace.json          plugin catalog — one entry per skill
 ├── skills/
-│   └── pid-generator/
+│   └── pfd-generator/
 │       ├── SKILL.md              instructions Claude loads
 │       ├── references/           detail loaded on demand, not up front
 │       ├── scripts/              deterministic code the skill calls

@@ -1,5 +1,5 @@
 ---
-name: pid-generator
+name: pfd-generator
 description: Generate a conceptual P&ID (piping and instrumentation diagram) as an editable SVG, along with the Python script that produced it. Use when the user describes a process and asks to draw, diagram, sketch, or visualize it; when they mention a P&ID, PFD, control loop drawing, or cascade control; or when they ask to edit an existing P&ID SVG. Not a substitute for an issued-for-design P&ID - does not size equipment or relief devices and does not perform hazard analysis.
 ---
 

@@ -1,6 +1,6 @@
 # Examples
 
-Sample output from the `pid-generator` skill. Open the SVG in a browser or vector editor — all labels are real `<text>` elements, so tags and notes can be edited directly.
+Sample output from the `pfd-generator` skill. Open the SVG in a browser or vector editor — all labels are real `<text>` elements, so tags and notes can be edited directly.
 
 | File | Description |
 |---|---|

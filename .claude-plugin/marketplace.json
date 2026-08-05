@@ -5,6 +5,9 @@
     "name": "Scott Duncan",
     "email": "srduncan14@gmail.com"
   },
+  "renames": {
+    "pid-generator": "pfd-generator"
+  },
   "plugins": [
     {
       "name": "chem-mfg-skills-all",
@@ -18,10 +21,10 @@
       "license": "MIT"
     },
     {
-      "name": "pid-generator",
+      "name": "pfd-generator",
       "displayName": "P&ID Generator",
       "source": "./",
-      "skills": ["./skills/pid-generator"],
+      "skills": ["./skills/pfd-generator"],
       "strict": false,
       "description": "Conceptual P&IDs as editable SVG: ISA-5.1 instrumentation, closed control loops, and a layout with no crossed process lines.",
       "category": "process-engineering",

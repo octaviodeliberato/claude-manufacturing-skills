@@ -35,7 +35,7 @@ Two things that separate a skill that works from one that doesn't:
 
 Two edits, both small:
 
-1. Add an entry to the `plugins` array in `.claude-plugin/marketplace.json`, copying the shape of the `pid-generator` entry (`"source": "./"`, `"skills": ["./skills/<your-skill-name>"]`, `"strict": false`).
+1. Add an entry to the `plugins` array in `.claude-plugin/marketplace.json`, copying the shape of the `pfd-generator` entry (`"source": "./"`, `"skills": ["./skills/<your-skill-name>"]`, `"strict": false`).
 2. Add a row to the skills table in `README.md`.
 
 ## 5. Test it
