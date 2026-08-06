@@ -6,6 +6,10 @@ A collection of [Claude Skills](https://code.claude.com/docs/en/skills) that enc
 
 Ask a general-purpose model for a PFD and you get a steam coil above the liquid level, an open control loop, a tag hidden under a valve body. A skill brings the standards and the review checklist into the session so those defects get caught first.
 
+![Conceptual PFD of the C-201 depropanizer: distillation column with overhead condenser, reflux drum and pump, and kettle reboiler, with reflux flow control and a reboiler temperature-to-steam cascade](skills/pfd-generator/examples/c-201-distillation-column.png)
+
+*C-201 depropanizer, drawn from a short process description. Reflux flow control, reboiler temperature-to-steam cascade, column pressure controlled by condenser duty. Delivered as an [editable SVG](skills/pfd-generator/examples/c-201-distillation-column.svg) — every tag is real text.*
+
 ## Skills
 
 | Skill | Produces | Triggers on |
