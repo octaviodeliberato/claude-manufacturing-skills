@@ -1,0 +1,47 @@
+name: Package skills
+
+# Publishes one ready-to-upload .zip per skill so a non-developer can install a
+# skill in claude.ai without cloning, unzipping, or re-zipping anything.
+# Assets live on the rolling `skills-latest` release and are refreshed on every
+# change to skills/, so the download links in README.md never go stale.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.github/workflows/package-skills.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zip each skill folder
+        run: |
+          mkdir -p dist
+          cd skills
+          for dir in */; do
+            name="${dir%/}"
+            # The zip root must be the skill folder itself — claude.ai expects
+            # to find SKILL.md one level in.
+            zip -r "../dist/${name}.zip" "$name" -x '*.DS_Store' '*__pycache__*'
+          done
+          ls -l ../dist
+
+      - name: Publish to the rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view skills-latest >/dev/null 2>&1; then
+            gh release upload skills-latest dist/*.zip --clobber
+          else
+            gh release create skills-latest dist/*.zip \
+              --title "Skill downloads" \
+              --notes "Ready-to-upload .zip for each skill. See the README for install steps. Refreshed automatically whenever a skill changes."
+          fi

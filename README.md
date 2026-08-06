@@ -18,7 +18,19 @@ See [`skills/pfd-generator/examples/`](skills/pfd-generator/examples) for sample
 
 ## Install
 
-**As a plugin (recommended).** Adds the skills to Claude Code and keeps them updated with `git pull` on your side:
+Pick whichever matches how you use Claude. The first one needs no terminal, no git, and no coding.
+
+### In claude.ai — point and click
+
+1. **Download** [`pfd-generator.zip`](https://github.com/ScottDuncanAI/claude-manufacturing-skills/releases/download/skills-latest/pfd-generator.zip). Leave it zipped — that's the format Claude wants.
+2. **Turn the feature on.** In claude.ai, open **Settings → Capabilities** and switch on **Skills** and **Code execution and file creation**.
+3. **Upload it.** Go to **Customize → Skills**, click **+ → Create skill**, choose the zip, and toggle the skill on.
+
+The same zip works in the Claude desktop app. You only do this once.
+
+### In Claude Code — as a plugin
+
+Two commands, and `git pull` on your side keeps it current:
 
 ```
 /plugin marketplace add ScottDuncanAI/claude-manufacturing-skills
@@ -27,19 +39,26 @@ See [`skills/pfd-generator/examples/`](skills/pfd-generator/examples) for sample
 
 Use `/plugin install chem-mfg-skills-all@chem-mfg-skills` to get every skill in the collection, including ones added later.
 
-**Manually, for yourself.** Copy any skill folder into your personal skills directory:
+### In Claude Code — by copying the folder
+
+For yourself, or for a project so everyone in that repo gets it:
 
 ```bash
-cp -r skills/pfd-generator ~/.claude/skills/
-```
-
-**Manually, for a project.** Copy it into the project so everyone working in that repo gets it:
-
-```bash
-cp -r skills/pfd-generator <your-project>/.claude/skills/
+cp -r skills/pfd-generator ~/.claude/skills/            # just you
+cp -r skills/pfd-generator <your-project>/.claude/skills/   # the whole repo
 ```
 
 Restart Claude Code after copying. Some skills carry Python dependencies — check for a `scripts/requirements.txt` inside the skill folder.
+
+## Drawing your first P&ID
+
+You don't invoke a skill and you don't name it. Start a chat and describe the process — the skill loads itself when the request matches. Something like:
+
+> Draw me a P&ID for a jacketed batch reactor. Steam to the jacket on temperature control, cascaded from the batch temperature to the jacket outlet. Level indication on the reactor, agitator, and a bottoms transfer pump.
+
+Claude will ask a question or two about anything that changes the drawing, then hand back an SVG. Open it in a browser, or drop it into PowerPoint, Visio, or Illustrator — every tag and note is real text, so you can edit labels yourself. It also returns the script that drew it, so "move the steam header down and re-issue" is a small change rather than a redraw.
+
+Then read it like a reviewer. It is a conceptual drawing, and it is your name on anything you pass along.
 
 ## What is a skill?
 
