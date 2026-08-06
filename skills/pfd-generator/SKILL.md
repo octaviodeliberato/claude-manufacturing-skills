@@ -71,6 +71,29 @@ python3 build_pid.py
 python3 -c "import cairosvg; cairosvg.svg2png(url='out.svg', write_to='preview.png', output_width=1680)"
 ```
 
+**If `cairosvg` will not install, do not skip this step and do not pretend the drawing was checked.** `cairosvg` needs native Cairo/GTK libraries that pip does not supply on Windows, so this fails routinely there. Fall back to a pure-Python renderer, which needs no native libraries:
+
+```bash
+pip install -q svglib pymupdf
+```
+
+```python
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPDF
+import pymupdf
+renderPDF.drawToFile(svg2rlg('out.svg'), '_tmp.pdf')
+pymupdf.open('_tmp.pdf')[0].get_pixmap(dpi=120).save('preview.png')
+```
+
+**The fallback does not draw arrowheads.** Arrowheads are SVG `<marker>` elements, and neither `svglib` nor `pymupdf` supports markers — they render dashes, fonts, colors, and geometry faithfully, but every arrowhead silently disappears. So when you are on the fallback:
+
+- Use the preview for what it is good at: collisions, overlaps, hidden text, elevations, crossed lines.
+- **A missing arrowhead in a fallback preview is a rendering artifact, not a defect.** Do not "fix" it. Chasing it will make you add duplicate arrows to a drawing that was already correct.
+- Verify directionality from the SVG source instead, which is more reliable than reading it off an image anyway: every `sig()` call and every `pipe(..., arrow=True)` should emit a `marker-end`. Count them and check each control loop leg has one.
+- Say in your final response that the preview was rendered without arrowheads and that directionality was confirmed from the source.
+
+If neither renderer is available, deliver the SVG and state plainly that you could not view it and it has not been visually checked. An unchecked drawing presented as a checked one is the worst outcome this skill can produce.
+
 Then open `preview.png` as an image (the Read tool in Claude Code, the `view` tool on claude.ai) and inspect it as an engineer would. Also crop and zoom the dense areas (control clusters, the vessel interior, instrument stacks) at 3200 px wide — collisions of a few pixels are invisible at full-sheet scale:
 
 ```python
