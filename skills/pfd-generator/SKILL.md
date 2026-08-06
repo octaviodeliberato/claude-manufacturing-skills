@@ -1,11 +1,11 @@
 ---
 name: pfd-generator
-description: Generate a conceptual P&ID (piping and instrumentation diagram) as an editable SVG, along with the Python script that produced it. Use when the user describes a process and asks to draw, diagram, sketch, or visualize it; when they mention a P&ID, PFD, control loop drawing, or cascade control; or when they ask to edit an existing P&ID SVG. Not a substitute for an issued-for-design P&ID - does not size equipment or relief devices and does not perform hazard analysis.
+description: Generate a conceptual PFD (process flow diagram) as an editable SVG, along with the Python script that produced it. Use when the user describes a process and asks to draw, diagram, sketch, or visualize it; when they mention a P&ID, PFD, control loop drawing, or cascade control; or when they ask to edit an existing P&ID SVG. Not a substitute for an issued-for-design P&ID - does not size equipment or relief devices and does not perform hazard analysis.
 ---
 
-# P&ID Generator
+# PFD Generator
 
-Produce a conceptual P&ID as a hand-authored SVG that a process engineer would accept: correct process flow, correct ISA instrumentation, closed control loops, and a layout with zero collisions and zero crossed process lines.
+Produce a conceptual PFD as a hand-authored SVG that a process engineer would accept: correct process flow, correct ISA instrumentation, closed control loops, and a layout with zero collisions and zero crossed process lines.
 
 The output is judged by an engineer who will spot a backwards arrowhead, a steam coil above the liquid level, or a label sitting under a balloon. Accuracy and legibility rank above speed.
 
