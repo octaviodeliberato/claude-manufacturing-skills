@@ -16,7 +16,7 @@ Everything here produces **conceptual, engineering-support output**. Every outpu
 |---|---|---|
 | [`pfd-generator`](skills/pfd-generator) | A conceptual P&ID as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing P&ID SVG |
 
-See [`skills/pfd-generator/examples/`](skills/pfd-generator/examples) for sample output.
+Additional skills will be added over time.
 
 ## Install
 
