@@ -4,7 +4,7 @@ By Scott Duncan. Reach me on LinkedIn here: https://www.linkedin.com/in/s-r-dunc
 
 A collection of [Claude Skills](https://code.claude.com/docs/en/skills) that encode chemical manufacturing engineering practices so that Claude produces work a practicing engineer would actually accept, rather than something that merely looks plausible.
 
-A general-purpose model asked to draw a P&ID will happily put a steam coil above the liquid level, leave a control loop open, or hide a tag under a valve body. The point of a skill is to carry the standards and the review checklist into the session with the request, so those defects get caught before you ever see the output.
+A general-purpose model asked to draw a PFD will happily put a steam coil above the liquid level, leave a control loop open, or hide a tag under a valve body. The point of a skill is to carry the standards and the review checklist into the session with the request, so those defects get caught before you ever see the output.
 
 ## Scope and disclaimer
 
@@ -14,7 +14,7 @@ Everything here produces **conceptual, engineering-support output**. Every outpu
 
 | Skill | Produces | Triggers on |
 |---|---|---|
-| [`pfd-generator`](skills/pfd-generator) | A conceptual P&ID as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing P&ID SVG |
+| [`pfd-generator`](skills/pfd-generator) | A conceptual PFD as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing PFD SVG |
 
 Additional skills will be added over time.
 
