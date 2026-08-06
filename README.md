@@ -8,7 +8,7 @@ Ask a general-purpose model for a PFD and you get a steam coil above the liquid 
 
 ![Conceptual PFD of the C-201 depropanizer: distillation column with overhead condenser, reflux drum and pump, and kettle reboiler, with reflux flow control and a reboiler temperature-to-steam cascade](skills/pfd-generator/examples/c-201-distillation-column.png)
 
-*C-201 depropanizer, drawn from a short process description. Reflux flow control, reboiler temperature-to-steam cascade, column pressure controlled by condenser duty. Delivered as an [editable SVG](skills/pfd-generator/examples/c-201-distillation-column.svg) — every tag is real text.*
+*Claude's output using the pfd-generator skill. A PFD of a depropanizer unit which includes process flows and control logic. Delivered as an [editable SVG](skills/pfd-generator/examples/c-201-distillation-column.svg).*
 
 ## Skills
 
