@@ -52,11 +52,11 @@ cp -r skills/pfd-generator <your-project>/.claude/skills/   # the whole repo
 
 Restart Claude Code after copying. Some skills carry Python dependencies — check for a `scripts/requirements.txt` inside the skill folder.
 
-## Drawing your first P&ID
+## Drawing your first PFD
 
-You don't invoke a skill and you don't name it. Start a chat and describe the process — the skill loads itself when the request matches. Something like:
+Simply open Claude and describe the process you'd like depicted in a PFD. The skill will load automatically, there's no need to say "use the PFD generator skill to..). Example:
 
-> Draw me a P&ID for a jacketed batch reactor. Steam to the jacket on temperature control, cascaded from the batch temperature to the jacket outlet. Level indication on the reactor, agitator, and a bottoms transfer pump.
+> Draw me a PFD for a jacketed batch reactor. Steam to the jacket on temperature control, cascaded from the batch temperature to the jacket outlet. Level indication on the reactor, agitator, and a bottoms transfer pump.
 
 Claude will ask a question or two about anything that changes the drawing, then hand back an SVG. Open it in a browser, or drop it into PowerPoint, Visio, or Illustrator — every tag and note is real text, so you can edit labels yourself. It also returns the script that drew it, so "move the steam header down and re-issue" is a small change rather than a redraw.
 
