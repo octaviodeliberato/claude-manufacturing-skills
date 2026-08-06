@@ -1,5 +1,7 @@
 # Chemical Manufacturing Skills for Claude
 
+By Scott Duncan. Reach me on LinkedIn here: https://www.linkedin.com/in/s-r-duncan/
+
 A collection of [Claude Skills](https://code.claude.com/docs/en/skills) that encode chemical manufacturing engineering practices so that Claude produces work a practicing engineer would actually accept, rather than something that merely looks plausible.
 
 A general-purpose model asked to draw a P&ID will happily put a steam coil above the liquid level, leave a control loop open, or hide a tag under a valve body. The point of a skill is to carry the standards and the review checklist into the session with the request, so those defects get caught before you ever see the output.
