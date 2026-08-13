@@ -53,6 +53,22 @@ cp -r skills/pfd-generator <your-project>/.claude/skills/   # the whole repo
 
 Restart Claude Code after copying. Some skills carry Python dependencies — check for a `scripts/requirements.txt` inside the skill folder.
 
+### In Claude Code — ask it to install one for you, scoped to your project
+
+No local clone of this repo needed. Paste this into a Claude Code session in your project, swapping in the skill name (e.g. `pfd-generator`, `mineral-processing-pfd`):
+
+```
+Install the <skill-name> Claude skill into this project, scoped to just this
+repo (not globally to ~/.claude/skills). Shallow-clone
+https://github.com/octaviodeliberato/claude-manufacturing-skills.git at
+branch main into a temp directory, copy its skills/<skill-name>/ folder into
+.claude/skills/<skill-name>/ at this project's root (creating .claude/skills/
+if it doesn't exist), then delete the temp clone. Confirm the copied folder
+contains SKILL.md, scripts/, references/, and examples/ before cleaning up.
+```
+
+This keeps the skill local to that one project. Add "and commit it" to the prompt if you want it checked into that project's own history so teammates get it too.
+
 ## Drawing your first PFD
 
 Simply open Claude and describe the process you'd like depicted in a PFD. The skill will load automatically, there's no need to say "use the PFD generator skill to..). Example:
