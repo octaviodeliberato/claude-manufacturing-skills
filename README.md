@@ -15,6 +15,7 @@ Ask a general-purpose model for a PFD and you get a steam coil above the liquid 
 | Skill | Produces | Triggers on |
 |---|---|---|
 | [`pfd-generator`](skills/pfd-generator) | A conceptual PFD as editable SVG, plus the Python script that generated it | A process description with a request to draw, diagram, sketch, or visualize it; any mention of P&ID, PFD, control loop drawings, or cascade control; a request to edit an existing PFD SVG |
+| [`mineral-processing-pfd`](skills/mineral-processing-pfd) | A conceptual mineral-processing/ore-dressing flowsheet as editable SVG, plus the Python script that generated it | A comminution, classification, flotation, or dewatering circuit description with a request to draw, diagram, sketch, or visualize it; mention of a mineral-processing flowsheet, ore-dressing PFD, or equipment like a crusher, SAG/ball mill, screen, hydrocyclone, flotation cell, thickener, or HPGR; a request to edit an existing mineral-processing PFD SVG |
 
 Additional skills will be added over time.
 

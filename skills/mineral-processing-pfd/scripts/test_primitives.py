@@ -1,0 +1,279 @@
+# -*- coding: utf-8 -*-
+"""
+Smoke tests for pid_lib's mineral-processing primitives.
+
+No pytest dependency - this repo has no test framework anywhere else, and
+the seam agreed for this skill (see spec) is: call each primitive, assert
+structural invariants on the SVG it produces, then rely on the mandatory
+render-and-inspect step (SKILL.md) as the real acceptance test. Run with:
+
+    python3 scripts/test_primitives.py
+"""
+import sys
+import xml.etree.ElementTree as ET
+
+from pid_lib import PID
+
+FAILURES = []
+
+
+def check(name, fn):
+    try:
+        fn()
+    except Exception as e:
+        FAILURES.append(f"{name}: {e}")
+        print(f"FAIL {name}: {e}")
+    else:
+        print(f"ok   {name}")
+
+
+def assert_valid_svg(d):
+    """The accumulated elements plus the <svg>/<defs> wrapper must be well-formed XML."""
+    svg = "\n".join(d.o + ["</svg>"])
+    ET.fromstring(svg)
+
+
+def assert_no_raster_images(d):
+    for s in d.o:
+        assert "<image" not in s, f"raster <image> element found: {s[:80]}"
+
+
+def assert_signals_have_arrowheads(d):
+    """Every dashed instrument-signal line must carry marker-end (Rule 3: complete,
+    directional control loops)."""
+    for s in d.o:
+        if 'stroke-dasharray="7,5.5"' in s:
+            assert "marker-end" in s, f"signal line missing arrowhead: {s[:80]}"
+
+
+def assert_no_bare_text_paths(d):
+    """Rule 4: text must be real <text>, never <path>/<use> glyph outlines standing
+    in for a label. We only ever emit <text>, so this just guards against a future
+    regression where someone pastes in glyph-path output."""
+    for s in d.o:
+        assert "<use" not in s, f"glyph-path <use> reference found: {s[:80]}"
+
+
+def standard_checks(d):
+    assert_valid_svg(d)
+    assert_no_raster_images(d)
+    assert_signals_have_arrowheads(d)
+    assert_no_bare_text_paths(d)
+
+
+# ---------------------------------------------------------------- comminution
+
+def test_rock_breaker():
+    d = PID()
+    d.rock_breaker(200, 80, tag="RB-101")
+    standard_checks(d)
+
+
+def test_feeder_vibrating():
+    d = PID()
+    d.feeder_vibrating(100, 100, 220, 140)
+    standard_checks(d)
+
+
+def test_crusher_jaw():
+    d = PID()
+    d.crusher_jaw(200, 100, 220, tag="CR-101")
+    standard_checks(d)
+
+
+def test_crusher_cone():
+    d = PID()
+    d.crusher_cone(200, 100, 240, tag="CR-102")
+    standard_checks(d)
+
+
+def test_crusher_gyratory():
+    d = PID()
+    d.crusher_gyratory(200, 100, 260, tag="CR-103")
+    standard_checks(d)
+
+
+def test_crusher_vsi():
+    d = PID()
+    d.crusher_vsi(200, 200, tag="CR-104")
+    standard_checks(d)
+
+
+def test_crusher_impact():
+    d = PID()
+    d.crusher_impact(200, 200, tag="CR-105")
+    standard_checks(d)
+
+
+def test_crusher_roll():
+    d = PID()
+    d.crusher_roll(200, 100, 220, tag="CR-106")
+    standard_checks(d)
+
+
+def test_screen_decks():
+    for n in (1, 2, 3, 4):
+        for wet in (False, True):
+            d = PID()
+            d.screen(150, 100, 350, 200, deck_count=n, wet=wet, tag=f"SD-{n}{'W' if wet else 'D'}")
+            standard_checks(d)
+
+
+def test_mill_sag():
+    d = PID()
+    d.mill_sag(200, 300, 420, 380, tag="ML-101")
+    standard_checks(d)
+
+
+def test_mill_ball():
+    d = PID()
+    d.mill_ball(200, 300, 420, 380, tag="ML-102")
+    standard_checks(d)
+
+
+COMMINUTION_TESTS = [
+    ("rock_breaker", test_rock_breaker),
+    ("feeder_vibrating", test_feeder_vibrating),
+    ("crusher_jaw", test_crusher_jaw),
+    ("crusher_cone", test_crusher_cone),
+    ("crusher_gyratory", test_crusher_gyratory),
+    ("crusher_vsi", test_crusher_vsi),
+    ("crusher_impact", test_crusher_impact),
+    ("crusher_roll", test_crusher_roll),
+    ("screen (1-4 deck, wet/dry)", test_screen_decks),
+    ("mill_sag", test_mill_sag),
+    ("mill_ball", test_mill_ball),
+]
+
+# ---------------------------------------------------------- classification/flotation
+
+def test_cyclone():
+    d = PID()
+    d.cyclone(200, 100, 220, tag="CL-101")
+    standard_checks(d)
+
+
+def test_classifier_screw():
+    d = PID()
+    d.classifier_screw(100, 150, 320, 220, tag="CL-102")
+    standard_checks(d)
+
+
+def test_classifier_rake():
+    d = PID()
+    d.classifier_rake(100, 150, 320, 220, tag="CL-103")
+    standard_checks(d)
+
+
+def test_flotation_cell():
+    d = PID()
+    d.flotation_cell(100, 150, 260, 260, tag="FL-101")
+    standard_checks(d)
+
+
+def test_flotation_column():
+    d = PID()
+    d.flotation_column(200, 100, 320, tag="FL-102")
+    standard_checks(d)
+
+
+CLASSIFICATION_TESTS = [
+    ("cyclone", test_cyclone),
+    ("classifier_screw", test_classifier_screw),
+    ("classifier_rake", test_classifier_rake),
+    ("flotation_cell", test_flotation_cell),
+    ("flotation_column", test_flotation_column),
+]
+
+# ------------------------------------------------------ dewatering/transport/storage
+
+def test_thickener():
+    d = PID()
+    d.thickener(300, 100, 260, tag="TH-101")
+    standard_checks(d)
+
+
+def test_filter_drum():
+    d = PID()
+    d.filter_drum(200, 200, tag="FT-101")
+    standard_checks(d)
+
+
+def test_pump_centrifugal():
+    d = PID()
+    d.pump_centrifugal(200, 200, tag="PU-101")
+    standard_checks(d)
+
+
+def test_pump_sump():
+    d = PID()
+    d.pump_sump(200, 200, tag="PU-102")
+    standard_checks(d)
+
+
+def test_feeder_apron():
+    d = PID()
+    d.feeder_apron(100, 150, 320, 200, tag="FD-101")
+    standard_checks(d)
+
+
+def test_conveyor():
+    d = PID()
+    d.conveyor(100, 200, 400, 120, tag="GE-101")
+    standard_checks(d)
+
+
+def test_ore_bin():
+    d = PID()
+    d.ore_bin(200, 100, 220, tag="GE-102")
+    standard_checks(d)
+
+
+def test_stockpile():
+    d = PID()
+    d.stockpile(200, 300, tag="GE-103")
+    standard_checks(d)
+
+
+def test_silo():
+    d = PID()
+    d.silo(200, 100, 260, tag="GE-104")
+    standard_checks(d)
+
+
+def test_tailings_dam():
+    d = PID()
+    d.tailings_dam(100, 300, tag="GE-105")
+    standard_checks(d)
+
+
+def test_splitter():
+    d = PID()
+    d.splitter(200, 200, n_outputs=2, tag="OP-101")
+    d2 = PID()
+    d2.splitter(200, 200, n_outputs=3, tag="OP-102")
+    standard_checks(d)
+    standard_checks(d2)
+
+
+DEWATERING_TRANSPORT_TESTS = [
+    ("thickener", test_thickener),
+    ("filter_drum", test_filter_drum),
+    ("pump_centrifugal", test_pump_centrifugal),
+    ("pump_sump", test_pump_sump),
+    ("feeder_apron", test_feeder_apron),
+    ("conveyor", test_conveyor),
+    ("ore_bin", test_ore_bin),
+    ("stockpile", test_stockpile),
+    ("silo", test_silo),
+    ("tailings_dam", test_tailings_dam),
+    ("splitter", test_splitter),
+]
+
+ALL_TESTS = list(COMMINUTION_TESTS) + CLASSIFICATION_TESTS + DEWATERING_TRANSPORT_TESTS
+
+if __name__ == "__main__":
+    for name, fn in ALL_TESTS:
+        check(name, fn)
+    print(f"\n{len(ALL_TESTS) - len(FAILURES)}/{len(ALL_TESTS)} passed")
+    sys.exit(1 if FAILURES else 0)

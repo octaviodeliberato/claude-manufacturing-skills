@@ -15,3 +15,8 @@ venv/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Source material with unresolved licensing (Iran Standard No. 508) — private
+# reference art for building mineral-processing-pfd, never shipped or
+# committed. See docs/adr/0002-ore-dressing-source-assets-not-committed.md.
+/assets/PNG Ore Dressing/

@@ -30,6 +30,17 @@
       "category": "process-engineering",
       "tags": ["p&id", "pfd", "diagram", "isa-5.1", "process-control", "svg"],
       "license": "MIT"
+    },
+    {
+      "name": "mineral-processing-pfd",
+      "displayName": "Mineral Processing PFD Generator",
+      "source": "./",
+      "skills": ["./skills/mineral-processing-pfd"],
+      "strict": false,
+      "description": "Conceptual mineral-processing/ore-dressing flowsheets as editable SVG: crushing, grinding, classification, flotation, and dewatering equipment with ISA-5.1 instrumentation and a layout with no crossed process lines.",
+      "category": "process-engineering",
+      "tags": ["mineral-processing", "ore-dressing", "flowsheet", "pfd", "mining", "svg"],
+      "license": "MIT"
     }
   ]
 }
