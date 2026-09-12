@@ -58,6 +58,12 @@ equipment by name or a simple per-drawing tag instead (see `CONTEXT.md`, "Equipm
 | `OP-SO` | Output Splitter | `splitter(cx, cy, n_outputs=2, tag=None)` | 2 or 3 outbound legs |
 | *(none — merge node)* | Stream junction | `junction(cx, cy)` | The same dot as `splitter`, for two streams joining into one (e.g. both oversizes of a 2-deck screen into one recycle line). The joining pipe ends on the dot with no arrowhead; the through-line passes over it |
 
+## Instrumentation (ISA-5.1, not from the source standard)
+
+| Code | Title | Primitive | Notes |
+|---|---|---|---|
+| *(ISA-5.1)* | Motor / variable-speed drive | `motor(cx, cy, tag=None, r=13, port="top")` | The drawn **final element** of every DRIVE SPEED loop (feeder, mill, pump). Circle with an "M"; returns the `(x, y)` on its rim (`top`/`bottom`/`left`/`right`) that the controller's signal lands on. Body only — draw the `lead()` to the equipment and the `sig()` yourself. Never stand a `cvalve` in for a drive. See `control-strategies.md` |
+
 ## Out of scope for this symbol set
 
 The remaining ~249 codes across Electrostatic Separators (`ES`), Collectors (`CO`), Leaching

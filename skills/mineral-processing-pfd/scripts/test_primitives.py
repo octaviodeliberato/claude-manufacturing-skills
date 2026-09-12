@@ -9,11 +9,13 @@ render-and-inspect step (SKILL.md) as the real acceptance test. Run with:
 
     python3 scripts/test_primitives.py
 """
+import importlib.util
+import os
 import re
 import sys
 import xml.etree.ElementTree as ET
 
-from pid_lib import PID
+from pid_lib import PID, ORE, SIG
 
 FAILURES = []
 
@@ -41,9 +43,10 @@ def assert_no_raster_images(d):
 
 def assert_signals_have_arrowheads(d):
     """Every dashed instrument-signal line must carry marker-end (Rule 3: complete,
-    directional control loops)."""
+    directional control loops). sig() emits <path>; the legend's dashed swatch
+    is a <line> and is deliberately not a signal."""
     for s in d.o:
-        if 'stroke-dasharray="7,5.5"' in s:
+        if s.startswith("<path") and 'stroke-dasharray="7,5.5"' in s:
             assert "marker-end" in s, f"signal line missing arrowhead: {s[:80]}"
 
 
@@ -351,7 +354,66 @@ DEWATERING_TRANSPORT_TESTS = [
     ("junction", test_junction),
 ]
 
-ALL_TESTS = list(COMMINUTION_TESTS) + CLASSIFICATION_TESTS + DEWATERING_TRANSPORT_TESTS
+# ------------------------------------------------------------- control strategy
+
+def test_motor():
+    """motor() is the drawn final element for a DRIVE SPEED loop (CONTEXT.md:
+    final element). It must return the coordinate the speed-controller signal
+    lands on, and that point must lie on/within the drawn body so the arrowhead
+    visibly touches the symbol."""
+    d = PID()
+    land = d.motor(300, 200, tag="M")
+    standard_checks(d)
+    circles = [s for s in d.o if s.startswith("<circle")]
+    assert circles, "motor must draw an ISA 'M' circle"
+    cx, cy, r = (float(re.search(k + r'="(-?[\d.]+)"', circles[0]).group(1)) for k in ("cx", "cy", "r"))
+    x, y = land
+    assert abs(x - cx) <= r + 0.5 and abs(y - cy) <= r + 0.5, f"landing {land} outside body"
+    assert any(">M<" in s for s in d.o), "motor must carry the letter M"
+
+
+def test_legend_declares_density_letter():
+    """ISA-5.1 Table 4.1 leaves first-letter D to the user; a drawing with a
+    density loop must declare it on the legend, and one without must not."""
+    entries = [("Ore slurry", ORE, False), ("DCS signal", SIG, True)]
+    with_d, without_d = PID(), PID()
+    with_d.legend(entries, density=True)
+    without_d.legend(entries)
+    standard_checks(with_d)
+    assert any("D = density" in s for s in with_d.o), "legend must declare D = density"
+    assert not any("D = density" in s for s in without_d.o), "no density loop, no declaration"
+
+
+def _load_example(name):
+    """Import examples/<name>.py as a module without running its __main__ save."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "..", "examples", name + ".py")
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_example_grinding_circuit_control():
+    """Drawing-level: the shipped basic-tier grinding example builds end to end,
+    passes every structural invariant, carries the per-circuit tier note
+    (ADR 0004) and declares D on the legend because it draws a density loop."""
+    d = _load_example("build_grinding_circuit_control").build()
+    standard_checks(d)
+    text = "\n".join(d.o)
+    assert "Grinding: basic" in text, "per-circuit tier note missing"
+    assert "D = density" in text, "density loop drawn but D not declared on the legend"
+    assert any('class="motor"' in s for s in d.o), "drive-speed loops need a motor final element"
+
+
+CONTROL_TESTS = [
+    ("motor", test_motor),
+    ("legend declares D = density", test_legend_declares_density_letter),
+    ("example: grinding_circuit_control end-to-end", test_example_grinding_circuit_control),
+]
+
+ALL_TESTS = (list(COMMINUTION_TESTS) + CLASSIFICATION_TESTS + DEWATERING_TRANSPORT_TESTS
+             + CONTROL_TESTS)
 
 if __name__ == "__main__":
     for name, fn in ALL_TESTS:

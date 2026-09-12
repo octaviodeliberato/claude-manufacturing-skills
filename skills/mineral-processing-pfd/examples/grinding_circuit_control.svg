@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="980" viewBox="0 0 1400 980" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif">
+<defs>
+<marker id="aBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#1d4e89"/></marker>
+<marker id="aRust" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#a34a28"/></marker>
+<marker id="aSig" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#50565f"/></marker>
+<marker id="aCyan" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#2a7f8f"/></marker>
+<marker id="aGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#3f7a4d"/></marker>
+<marker id="aOre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#7a5230"/></marker>
+<marker id="aSolids" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0,0 L 10,5 L 0,10 z" fill="#9c8552"/></marker>
+</defs>
+<rect width="1400" height="980" fill="#ffffff"/>
+<rect x="20" y="20" width="1360" height="940" fill="none" stroke="#b8bec7" stroke-width="1"/>
+<text x="45" y="60" font-size="21" font-weight="bold" fill="#111418" text-anchor="start">GRINDING CIRCUIT - BASIC CONTROL STRATEGY</text>
+<text x="45" y="82" font-size="11.5" font-weight="normal" fill="#5a6472" text-anchor="start">SAG - ball mill - hydrocyclone closed circuit | regulatory (basic tier) loops, 200-series tags</text>
+<rect x="1178" y="42" width="177" height="24" fill="none" stroke="#b02418" stroke-width="1.4"/>
+<text x="1266" y="59" font-size="11" font-weight="bold" fill="#b02418" text-anchor="middle" letter-spacing="0.4">NOT FOR CONSTRUCTION</text>
+<path d="M 40.0,290 L 110,220 L 180.0,290 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<line x1="40.0" y1="290" x2="180.0" y2="290" stroke="#343a46" stroke-width="1.6"/>
+<text x="110" y="208" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">Crushed ore stockpile</text>
+<path d="M 110,290 L 110,420" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
+<path d="M 80,420 L 180,420 L 170,450 L 70,450 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<line x1="88.3" y1="420" x2="86.3" y2="450" stroke="#343a46" stroke-width="1"/>
+<line x1="106.7" y1="420" x2="105.7" y2="450" stroke="#343a46" stroke-width="1"/>
+<line x1="125.0" y1="420" x2="125.0" y2="450" stroke="#343a46" stroke-width="1"/>
+<line x1="143.3" y1="420" x2="144.3" y2="450" stroke="#343a46" stroke-width="1"/>
+<line x1="161.7" y1="420" x2="163.7" y2="450" stroke="#343a46" stroke-width="1"/>
+<text x="100" y="475" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">FD-201</text>
+<text x="100" y="488" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="middle">Reclaim feeder</text>
+<circle class="motor" cx="160" cy="390" r="13" fill="#ffffff" stroke="#343a46" stroke-width="1.6"/>
+<text x="160" y="394.5" font-size="12.5" font-weight="bold" fill="#111418" text-anchor="middle">M</text>
+<line x1="160" y1="403" x2="160" y2="420" stroke="#343a46" stroke-width="1.2"/>
+<path d="M 170,450 L 170,500 L 210,500" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
+<line x1="210" y1="500" x2="330" y2="440" stroke="#343a46" stroke-width="1.6"/>
+<line x1="210" y1="510" x2="330" y2="450" stroke="#343a46" stroke-width="1.6"/>
+<line x1="230.0" y1="490.0" x2="230.0" y2="500.0" stroke="#343a46" stroke-width="1"/>
+<line x1="250.0" y1="480.0" x2="250.0" y2="490.0" stroke="#343a46" stroke-width="1"/>
+<line x1="270.0" y1="470.0" x2="270.0" y2="480.0" stroke="#343a46" stroke-width="1"/>
+<line x1="290.0" y1="460.0" x2="290.0" y2="470.0" stroke="#343a46" stroke-width="1"/>
+<line x1="310.0" y1="450.0" x2="310.0" y2="460.0" stroke="#343a46" stroke-width="1"/>
+<path d="M 270.0,475.0 L 263.5,482.6 L 260.0,475.6 Z" fill="#343a46"/>
+<text x="245" y="526" font-size="10" font-weight="bold" fill="#111418" text-anchor="middle">CV-201</text>
+<path d="M 330,440 L 370,440 L 370,460 L 400,460" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
+<rect x="426.4" y="405" width="167.20000000000005" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="436.29999999999995" y1="405" x2="436.29999999999995" y2="515" stroke="#343a46" stroke-width="1.2"/>
+<line x1="583.7" y1="405" x2="583.7" y2="515" stroke="#343a46" stroke-width="1.2"/>
+<path class="trunnion" d="M 426.4,435.2 L 415.8,435.2 L 415.8,444.6 L 400,444.6 L 400,475.4 L 415.8,475.4 L 415.8,484.8 L 426.4,484.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<path class="trunnion" d="M 593.6,435.2 L 604.2,435.2 L 604.2,444.6 L 620,444.6 L 620,475.4 L 604.2,475.4 L 604.2,484.8 L 593.6,484.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<circle class="charge" cx="448.2" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="469.5" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="490.8" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="512.1" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="533.4" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="554.7" cy="503.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<text x="510.0" y="537" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">ML-201  SAG Mill</text>
+<text x="122" y="652" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="start">Process water</text>
+<path d="M 90,660 L 232,660" fill="none" stroke="#1d4e89" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 232,648 L 232,672 L 250,660 Z" fill="#ffffff" stroke="#343a46" stroke-width="1.6" stroke-linejoin="miter"/>
+<path d="M 268,648 L 268,672 L 250,660 Z" fill="#ffffff" stroke="#343a46" stroke-width="1.6" stroke-linejoin="miter"/>
+<line x1="250" y1="660" x2="250" y2="640" stroke="#343a46" stroke-width="1.4"/>
+<rect x="236" y="622" width="28" height="12" rx="6" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="250" y="705" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">FV-202  (FC)</text>
+<path d="M 268,660 L 385,660 L 385,460" fill="none" stroke="#1d4e89" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="385" cy="460" r="3.5" fill="#343a46"/>
+<path d="M 620,460 L 660,460 L 660,590 L 750,590 L 750,544" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 736,526 L 784,526 L 772,544 L 748,544 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.5"/>
+<circle cx="760" cy="500" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.6"/>
+<path d="M 754,491 L 754,509 L 769,500 Z" fill="#343a46"/>
+<text x="812" y="520" font-size="10" font-weight="bold" fill="#111418" text-anchor="start">PU-201</text>
+<text x="812" y="532" font-size="8.5" font-weight="normal" fill="#5a6472" text-anchor="start">Cyclone feed pump</text>
+<circle class="motor" cx="760" cy="455" r="13" fill="#ffffff" stroke="#343a46" stroke-width="1.6"/>
+<text x="760" y="459.5" font-size="12.5" font-weight="bold" fill="#111418" text-anchor="middle">M</text>
+<line x1="760" y1="468" x2="760" y2="484" stroke="#343a46" stroke-width="1.2"/>
+<rect x="938" y="310" width="44" height="22" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<path d="M 938,332 L 982,332 L 960,420 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="925.9" y1="319.9" x2="938" y2="319.9" stroke="#343a46" stroke-width="1.6"/>
+<line x1="960" y1="299.0" x2="960" y2="310" stroke="#343a46" stroke-width="1.6"/>
+<text x="990" y="380.0" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="start">CL-201  Cyclone</text>
+<path d="M 786,500 L 800,500 L 800,319.9 L 925.9,319.9" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 960,420 L 960,460 L 1040,460" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 960,299.0 L 960,250 L 1360,250" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<text x="1250" y="242" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="middle">Cyclone overflow to flotation</text>
+<rect x="1066.4" y="405" width="167.19999999999982" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="1076.3000000000002" y1="405" x2="1076.3000000000002" y2="515" stroke="#343a46" stroke-width="1.2"/>
+<line x1="1223.6999999999998" y1="405" x2="1223.6999999999998" y2="515" stroke="#343a46" stroke-width="1.2"/>
+<path class="trunnion" d="M 1066.4,435.2 L 1055.8,435.2 L 1055.8,444.6 L 1040,444.6 L 1040,475.4 L 1055.8,475.4 L 1055.8,484.8 L 1066.4,484.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<path class="trunnion" d="M 1233.6,435.2 L 1244.2,435.2 L 1244.2,444.6 L 1260,444.6 L 1260,475.4 L 1244.2,475.4 L 1244.2,484.8 L 1233.6,484.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<circle class="charge" cx="1083.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1094.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1106.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1117.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1129.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1140.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1152.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1163.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1175.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1186.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1198.3" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1209.8" cy="508.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1088.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1099.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1111.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1122.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1134.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1145.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1157.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1168.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1180.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1191.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1203.3" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1214.8" cy="499.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<text x="1150.0" y="537" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">ML-202  Ball Mill</text>
+<path d="M 1260,460 L 1300,460 L 1300,620 L 770,620 L 770,544" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<text x="1030" y="638" font-size="8.5" font-weight="normal" fill="#5a6472" text-anchor="middle">Ball mill discharge to cyclone feed sump (closed circuit)</text>
+<text x="1015" y="574" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="start">Dilution water</text>
+<path d="M 1010,570 L 938,570" fill="none" stroke="#1d4e89" stroke-width="2.4" stroke-linejoin="round"/>
+<path d="M 902,558 L 902,582 L 920,570 Z" fill="#ffffff" stroke="#343a46" stroke-width="1.6" stroke-linejoin="miter"/>
+<path d="M 938,558 L 938,582 L 920,570 Z" fill="#ffffff" stroke="#343a46" stroke-width="1.6" stroke-linejoin="miter"/>
+<line x1="920" y1="570" x2="920" y2="550" stroke="#343a46" stroke-width="1.4"/>
+<rect x="906" y="532" width="28" height="12" rx="6" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="920" y="600" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">DV-206  (FC)</text>
+<path d="M 902,570 L 820,570 L 820,540 L 780,540" fill="none" stroke="#1d4e89" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aBlue)"/>
+<circle cx="300" cy="380" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="300" y="378" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">WT</text>
+<text x="300" y="392" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">201</text>
+<line x1="300" y1="453" x2="300" y2="396" stroke="#343a46" stroke-width="1.2"/>
+<rect x="280" y="290" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="300" cy="310" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="300" y="308" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">WIC</text>
+<text x="300" y="322" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">201</text>
+<path d="M 300,364 L 300,330" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<path d="M 280,310 L 160,310 L 160,377" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="110" cy="580" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="110" y="578" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">FT</text>
+<text x="110" y="592" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">202</text>
+<line x1="110" y1="660" x2="110" y2="596" stroke="#343a46" stroke-width="1.2"/>
+<rect x="230" y="560" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="250" cy="580" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="250" y="578" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">FIC</text>
+<text x="250" y="592" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">202</text>
+<path d="M 126,580 L 230,580" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<path d="M 250,600 L 250,622" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="470" cy="365" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="470" y="363" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">WT</text>
+<text x="470" y="377" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">203</text>
+<line x1="470" y1="405" x2="470" y2="381" stroke="#343a46" stroke-width="1.2"/>
+<rect x="450" y="290" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="470" cy="310" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="470" y="308" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">WIC</text>
+<text x="470" y="322" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">203</text>
+<path d="M 470,349 L 470,330" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<path d="M 450,310 L 320,310" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<text x="335" y="302" font-size="8.5" font-weight="normal" fill="#5a6472" text-anchor="start">SP</text>
+<circle cx="560" cy="365" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="560" y="363" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">JT</text>
+<text x="560" y="377" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">204</text>
+<line x1="560" y1="405" x2="560" y2="381" stroke="#343a46" stroke-width="1.2"/>
+<rect x="540" y="290" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="560" cy="310" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="560" y="308" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">JI</text>
+<text x="560" y="322" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">204</text>
+<path d="M 560,349 L 560,330" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="700" cy="536" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="700" y="534" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">LT</text>
+<text x="700" y="548" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">205</text>
+<line x1="738" y1="536" x2="716" y2="536" stroke="#343a46" stroke-width="1.2"/>
+<rect x="680" y="380" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="700" cy="400" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="700" y="398" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">LIC</text>
+<text x="700" y="412" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">205</text>
+<path d="M 700,520 L 700,420" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<path d="M 720,400 L 760,400 L 760,442" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="840" cy="420" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="840" y="418" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">DT</text>
+<text x="840" y="432" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">206</text>
+<line x1="800" y1="420" x2="824" y2="420" stroke="#343a46" stroke-width="1.2"/>
+<rect x="880" y="400" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="900" cy="420" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="900" y="418" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">DIC</text>
+<text x="900" y="432" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">206</text>
+<path d="M 856,420 L 880,420" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<path d="M 900,440 L 900,500 L 920,500 L 920,532" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="870" cy="280" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="870" y="278" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">PT</text>
+<text x="870" y="292" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">207</text>
+<line x1="870" y1="319.9" x2="870" y2="296" stroke="#343a46" stroke-width="1.2"/>
+<rect x="850" y="200" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="870" cy="220" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="870" y="218" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">PI</text>
+<text x="870" y="232" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">207</text>
+<path d="M 870,264 L 870,240" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<circle cx="1080" cy="210" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="1080" y="208" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">AT</text>
+<text x="1080" y="222" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">208</text>
+<line x1="1080" y1="250" x2="1080" y2="226" stroke="#343a46" stroke-width="1.2"/>
+<rect x="1120" y="190" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="1140" cy="210" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="1140" y="208" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">AI</text>
+<text x="1140" y="222" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">208</text>
+<path d="M 1096,210 L 1120,210" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<text x="1110" y="180" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="middle">PSM</text>
+<circle cx="1150" cy="365" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="1150" y="363" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">JT</text>
+<text x="1150" y="377" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">209</text>
+<line x1="1150" y1="405" x2="1150" y2="381" stroke="#343a46" stroke-width="1.2"/>
+<rect x="1130" y="290" width="40" height="40" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<circle cx="1150" cy="310" r="20" fill="#ffffff" stroke="#343a46" stroke-width="1.4"/>
+<text x="1150" y="308" font-size="11.5" font-weight="bold" fill="#111418" text-anchor="middle">JI</text>
+<text x="1150" y="322" font-size="10" font-weight="normal" fill="#111418" text-anchor="middle">209</text>
+<path d="M 1150,349 L 1150,330" fill="none" stroke="#50565f" stroke-width="1.35" stroke-dasharray="7,5.5" marker-end="url(#aSig)"/>
+<text x="60" y="760" font-size="11" font-weight="bold" fill="#111418" text-anchor="start" letter-spacing="0.4">CONTROL STRATEGY</text>
+<text x="60" y="784" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Grinding: basic tier (assumed - no tier was named; intermediate/advanced add cascades, ratio, override, supervisory)</text>
+<text x="60" y="802" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Sump level -&gt; pump speed and cyclone feed density -&gt; dilution water: chosen pairing, they cannot share the water valve</text>
+<text x="60" y="820" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  JI-204 / JI-209 (mill power), PI-207 (cyclone feed pressure), AI-208 (PSM) are monitors - indication only, no final element</text>
+<text x="60" y="838" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Feeder and pump speed loops terminate on the drive (M), not a valve; WIC-203 writes the setpoint of WIC-201</text>
+<text x="760" y="760" font-size="11" font-weight="bold" fill="#111418" text-anchor="start" letter-spacing="0.4">DESIGN BASIS / ASSUMPTIONS</text>
+<text x="760" y="784" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Conceptual only: no setpoints, tuning, controller or transmitter sizing, interlocks or alarms</text>
+<text x="760" y="802" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Single SAG - ball mill line, fixed-speed mills, sump pump on VSD; loop tags 200-series (grinding)</text>
+<text x="760" y="820" font-size="9.5" font-weight="normal" fill="#5a6472" text-anchor="start">&#8226;  Not for construction - no equipment sizing, mass balance, or hazard review</text>
+<line x1="60" y1="926" x2="105" y2="926" stroke="#9c8552" stroke-width="2.8"/>
+<text x="115" y="931" font-size="12" font-weight="normal" fill="#5a6472" text-anchor="start">Ore / dry solids (conveyed)</text>
+<line x1="333.20000000000005" y1="926" x2="378.20000000000005" y2="926" stroke="#7a5230" stroke-width="2.8"/>
+<text x="388.20000000000005" y="931" font-size="12" font-weight="normal" fill="#5a6472" text-anchor="start">Ore slurry / pulp</text>
+<line x1="543.2" y1="926" x2="588.2" y2="926" stroke="#1d4e89" stroke-width="2.8"/>
+<text x="598.2" y="931" font-size="12" font-weight="normal" fill="#5a6472" text-anchor="start">Process / dilution water</text>
+<line x1="796.6" y1="926" x2="841.6" y2="926" stroke="#50565f" stroke-width="1.6" stroke-dasharray="7,5.5"/>
+<text x="851.6" y="931" font-size="12" font-weight="normal" fill="#5a6472" text-anchor="start">DCS signal</text>
+<text x="1006.6" y="931" font-size="10.5" font-weight="normal" fill="#5a6472" text-anchor="start">ISA letter D = density (user's choice, ISA-5.1 Table 4.1)</text>
+<text x="1345" y="950" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="end">Rev A | mineral-processing-pfd example</text>
+</svg>

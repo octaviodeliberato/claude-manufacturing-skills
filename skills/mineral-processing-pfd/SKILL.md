@@ -1,6 +1,6 @@
 ---
 name: mineral-processing-pfd
-description: Generate a conceptual mineral-processing/ore-dressing flowsheet (PFD) as an editable SVG, along with the Python script that produced it. Use when the user describes a comminution, classification, flotation, or dewatering circuit and asks to draw, diagram, sketch, or visualize it; when they mention a mineral-processing flowsheet, ore-dressing PFD, or equipment like a crusher, SAG/ball mill, screen, hydrocyclone, flotation cell, thickener, or HPGR; or when they ask to edit an existing mineral-processing PFD SVG. Not a substitute for an issued-for-design flowsheet - does not size equipment, does not perform metallurgical balance calculations, and does not perform hazard analysis.
+description: Generate a conceptual mineral-processing/ore-dressing flowsheet (PFD) as an editable SVG, along with the Python script that produced it. Use when the user describes a comminution, classification, flotation, or dewatering circuit and asks to draw, diagram, sketch, or visualize it; when they mention a mineral-processing flowsheet, ore-dressing PFD, or equipment like a crusher, SAG/ball mill, screen, hydrocyclone, flotation cell, thickener, or HPGR; or when they ask to edit an existing mineral-processing PFD SVG. Also use when they ask to add a control strategy, control philosophy, control loops, instrumentation or automation to a crushing or grinding flowsheet, ask for basic/intermediate/advanced control, mill load control, cyclone feed density control, or a control narrative. Not a substitute for an issued-for-design flowsheet - does not size equipment, does not perform metallurgical balance calculations, and does not perform hazard analysis.
 ---
 
 # Mineral Processing PFD Generator
@@ -31,6 +31,7 @@ A process description almost always underspecifies the circuit. Before drawing, 
 - Screen deck counts, and wet or dry screening?
 - Which classification method — cyclone, screw, or rake?
 - Does any piece of equipment need instrumentation (density control on a cyclone feed, level control on a thickener, pH control ahead of flotation)? If so, which is the master/slave in a cascade?
+- If the user asks for a **control strategy** (control philosophy, loops, instrumentation, automation) on a crushing or grinding circuit: resolve the **control tier** per circuit — basic, intermediate or advanced, see `references/control-strategies.md`. Default is **basic**; don't ask, assume it and state the assumption in the delivery. Advanced is never drawn unasked. Flotation/thickening control strategies aren't in the reference yet — say so rather than improvising.
 
 Ask at most 2–3 questions, and only for things that change the drawing. For anything minor, make a defensible engineering assumption and state it afterward.
 
@@ -46,7 +47,7 @@ Write out the coordinate plan first, same discipline as `pfd-generator`:
 
 `scripts/pid_lib.py` provides the primitives. Read it before writing the script and use it rather than reinventing symbols. It has two layers:
 
-- **Generic** (forked from `pfd-generator`, unchanged behavior): `pipe`, `sig`, `lead`, `line_jump`, `bubble`, `cvalve`, `manual_valve`, `vessel`, `agitator`, `equip_tag`, `legend`, `title`, `notes`, `design_basis`, `revision`.
+- **Generic** (forked from `pfd-generator`, unchanged behavior): `pipe`, `sig`, `lead`, `line_jump`, `bubble`, `cvalve`, `manual_valve`, `vessel`, `agitator`, `equip_tag`, `legend`, `title`, `notes`, `design_basis`, `revision`; plus `motor` (ISA drive symbol, the final element for speed loops — new here, not in `pfd-generator`).
 - **Mineral-processing equipment** (new): `rock_breaker`, `feeder_vibrating`, `crusher_jaw`, `crusher_cone`, `crusher_gyratory`, `crusher_vsi`, `crusher_impact`, `crusher_roll`, `screen` (parametric, 1–4 decks, wet/dry), `mill_sag`, `mill_ball` (trunnions + charge; `x0..x1` is the outer envelope including the trunnions), `cyclone`, `classifier_screw`, `classifier_rake`, `flotation_cell`, `flotation_column`, `thickener`, `filter_drum`, `pump_centrifugal`, `pump_sump`, `feeder_apron`, `conveyor`, `ore_bin`, `stockpile`, `silo`, `tailings_dam`, `splitter`, `junction`.
 
 Read `references/mineral-processing-symbols.md` for what each symbol represents, its source-standard code, and known caveats (in particular: `crusher_roll` is the closest match for HPGR, not a literal HPGR-specific symbol — say so if the drawing includes one).
@@ -59,6 +60,8 @@ Two composition rules the primitives cannot enforce for you:
 - **Size a cyclone to its neighbours.** `cyclone()` takes `top`/`bottom` from you; make it about the height of the adjacent mill or sump, never taller, and keep the standard's tall-narrow proportion — the cylinder is `r` high, so give the cone at least ~3`r`. It returns its `feed`/`overflow`/`underflow` points — start and end your pipes on those.
 
 Reuse the ISA-5.1 instrumentation primitives (`bubble`, `cvalve`, `sig`) for any control loop exactly as `pfd-generator` does — the source standard defines no ore-dressing-specific instrumentation of its own, so there's nothing to substitute.
+
+**Control strategy.** When a strategy was requested, read `references/control-strategies.md` and draw that tier's loops for every circuit present — nothing more, nothing less. Drive-speed final elements (feeder, mill, pump VSDs) terminate on `motor()`, never on a `cvalve`; it returns the point the controller's signal lands on. Water loops terminate on `cvalve`. Monitors (mill power, PSM, a leftover pressure) stop at an indicator bubble. Sump level and cyclone feed density cannot both sit on the dilution-water valve — pick the pairing the reference describes and state it. Any `DT`/`DIC` needs `legend(..., density=True)`. Stamp the sheet with a per-circuit tier note via `notes()` ("Grinding: basic (assumed)"). `examples/build_grinding_circuit_control.py` is the pattern to copy.
 
 **Label equipment by name or a simple per-drawing tag** (e.g. "SAG Mill" or `ML-101`), via `equip_tag`. Never surface the source standard's internal `XX-YY` class code (e.g. `ML-BA`) on the drawing — it's a lookup key in the reference doc, not a drawing tag, and never surface its full `NNLL-LL-LLNN` tag format at all (this skill doesn't implement that scheme).
 
@@ -90,7 +93,8 @@ State briefly:
 - Engineering assumptions made (especially ore type/separation method, screen deck counts and wet/dry, and any HPGR-as-roll-crusher approximation)
 - Anything in the description that could not be drawn because it falls outside the shipped ~26-symbol set, and why
 - Any design concern noticed while drawing
+- When a control strategy was drawn: the **control narrative** table (columns `Loop tag | Tier | Measured variable | Manipulated variable / final element | Objective | Notes`, one row per loop, monitors marked as such) and the tier assumption ("basic tier assumed for grinding — no tier was named"), plus the level/density pairing chosen
 
 ### What this skill does not do
 
-It draws conceptual mineral-processing flowsheets covering a base-metal flotation circuit's comminution, classification, flotation, dewatering, and material-handling equipment. It does not size equipment, does not perform metallurgical mass/balance calculations, and does not perform hazard analysis. It does not yet cover magnetic-separation or gravity-separation circuits (iron ore, gold/placer), the standard's full ~275-symbol/20-category set, or the standard's formal equipment tag-numbering scheme — say so if the user's framing implies otherwise.
+It draws conceptual mineral-processing flowsheets covering a base-metal flotation circuit's comminution, classification, flotation, dewatering, and material-handling equipment. It does not size equipment, does not perform metallurgical mass/balance calculations, and does not perform hazard analysis. It does not yet cover magnetic-separation or gravity-separation circuits (iron ore, gold/placer), the standard's full ~275-symbol/20-category set, or the standard's formal equipment tag-numbering scheme — say so if the user's framing implies otherwise. Control strategies are conceptual: no setpoints, tuning, controller or transmitter sizing, interlock/safety or alarm design, and no flotation or thickening control strategies yet (crushing and grinding only).

@@ -200,6 +200,24 @@ class PID:
                  f'L {cx+32},{b+13} Z" fill="{EQ}"/>')
         self.txt(cx + 42, top - 18, tag, size=10.5, weight="bold")
 
+    def motor(self, cx, cy, tag=None, r=13, port="top"):
+        """ISA-5.1 motor/drive: a circle with an 'M', the drawn final element of
+        every DRIVE SPEED control loop (feeder, mill drive, pump VSD) - never
+        a control valve. Place it touching the driven equipment and run the
+        speed controller's signal to the point this returns: the top, bottom,
+        left or right of the circle per `port`. Body only: the composing script
+        draws the shaft/lead to the equipment (lead()) and the signal (sig()),
+        so nothing here fights the surrounding layout. `tag` (e.g. "M-201")
+        prints below the circle."""
+        self.add(f'<circle class="motor" cx="{cx}" cy="{cy}" r="{r}" fill="#ffffff" '
+                 f'stroke="{EQ}" stroke-width="1.6"/>')
+        self.txt(cx, cy + 4.5, "M", size=12.5, weight="bold", anchor="middle")
+        if tag:
+            self.txt(cx, cy + r + 13, tag, size=9.5, weight="bold", anchor="middle")
+        ports = {"top": (cx, cy - r), "bottom": (cx, cy + r),
+                 "left": (cx - r, cy), "right": (cx + r, cy)}
+        return ports[port]
+
     def equip_tag(self, cx, y, tag, service=None, detail=None):
         """Equipment identification. Place in dead space; check against any line
         dropping from the equipment bottom."""
@@ -692,8 +710,10 @@ class PID:
     def design_basis(self, cx, y, text, size=9.5):
         self.txt(cx, y, esc(text), size=size, fill=SUB, anchor="middle")
 
-    def legend(self, entries, y=886, x=60, gap=210, size=12):
-        """entries: list of (label, color, dashed)."""
+    def legend(self, entries, y=886, x=60, gap=210, size=12, density=False):
+        """entries: list of (label, color, dashed). density=True appends the
+        ISA-5.1 declaration for first letter D (Table 4.1 leaves it to the
+        user's choice) - set it whenever the drawing carries a DT/DIC loop."""
         cx = x
         for label, color, dashed in entries:
             dash = ' stroke-dasharray="7,5.5"' if dashed else ''
@@ -702,6 +722,9 @@ class PID:
                      f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
             self.txt(cx + 55, y + 5, esc(label), size=size, fill=SUB)
             cx += max(gap, 55 + text_width(label, size) + 40)
+        if density:
+            self.txt(cx, y + 5, "ISA letter D = density (user's choice, ISA-5.1 Table 4.1)",
+                     size=size - 1.5, fill=SUB)
 
     def revision(self, text, y=890):
         self.txt(self.w - 55, y, esc(text), size=9, fill=SUB, anchor="end")
