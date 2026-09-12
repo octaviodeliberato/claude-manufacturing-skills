@@ -76,6 +76,8 @@
 <path d="M 980.0,305 L 980.0,325 L 1130,325 L 1130,285" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
 <path d="M 1240,220 L 1290,190 L 1340,190 L 1340,230" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
 <path d="M 1060,206.0 L 1100,206.0 L 1100,120 L 680,120 L 680,170" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
+<path d="M 1060,227.0 L 1100,227.0 L 1100,206.0" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round"/>
+<circle cx="1100" cy="206.0" r="3.5" fill="#343a46"/>
 <text x="910.0" y="112" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="middle">Oversize recycle</text>
 <path d="M 1340,320 L 1340,350 L 150,350 L 150,465" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
 <path d="M 100,465 L 210,465 L 200,495 L 90,495 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
@@ -85,50 +87,68 @@
 <line x1="170.0" y1="465" x2="171.0" y2="495" stroke="#343a46" stroke-width="1"/>
 <line x1="190.0" y1="465" x2="192.0" y2="495" stroke="#343a46" stroke-width="1"/>
 <text x="150.0" y="517" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">FD-102  Reclaim Feeder</text>
-<rect x="280" y="425" width="240" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
-<ellipse cx="280" cy="480.0" rx="14.0" ry="55.0" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
-<ellipse cx="520" cy="480.0" rx="14.0" ry="55.0" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
-<circle cx="427.9" cy="453.9" r="9" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="355.0" cy="464.8" r="9" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="447.3" cy="489.7" r="9" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="478.4" cy="457.3" r="9" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="384.4" cy="454.1" r="9" fill="none" stroke="#343a46" stroke-width="1"/>
+<rect x="308.8" y="425" width="182.39999999999998" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="319.6" y1="425" x2="319.6" y2="535" stroke="#343a46" stroke-width="1.2"/>
+<line x1="480.4" y1="425" x2="480.4" y2="535" stroke="#343a46" stroke-width="1.2"/>
+<path class="trunnion" d="M 308.8,455.2 L 297.3,455.2 L 297.3,464.6 L 280,464.6 L 280,495.4 L 297.3,495.4 L 297.3,504.8 L 308.8,504.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<path class="trunnion" d="M 491.2,455.2 L 502.7,455.2 L 502.7,464.6 L 520,464.6 L 520,495.4 L 502.7,495.4 L 502.7,504.8 L 491.2,504.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<circle class="charge" cx="331.5" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="352.8" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="374.1" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="395.4" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="416.7" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="438.0" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="459.3" cy="523.5" r="9.9" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
 <text x="400.0" y="557" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">ML-101  SAG Mill</text>
 <path d="M 626,541 L 674,541 L 662,559 L 638,559 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.5"/>
 <circle cx="650" cy="515" r="16" fill="#ffffff" stroke="#343a46" stroke-width="1.6"/>
 <path d="M 644,506 L 644,524 L 659,515 Z" fill="#343a46"/>
 <text x="650" y="577" font-size="10" font-weight="bold" fill="#111418" text-anchor="middle">PU-101  Sump Pump</text>
-<rect x="750" y="400" width="60" height="30" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
-<path d="M 750,430 L 810,430 L 780,550 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
-<line x1="734" y1="414" x2="750" y2="414" stroke="#343a46" stroke-width="1.6"/>
-<line x1="780" y1="386" x2="780" y2="400" stroke="#343a46" stroke-width="1.6"/>
-<text x="780" y="570" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">CL-101  Cyclone</text>
-<rect x="920" y="425" width="240" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
-<ellipse cx="920" cy="480.0" rx="14.0" ry="55.0" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
-<ellipse cx="1160" cy="480.0" rx="14.0" ry="55.0" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
-<circle cx="1067.9" cy="453.9" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="995.0" cy="464.8" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1087.3" cy="489.7" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1118.4" cy="457.3" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1024.4" cy="454.1" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="983.7" cy="480.3" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="945.3" cy="463.4" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1070.0" cy="482.5" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="984.1" cy="484.9" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1101.9" cy="452.9" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1101.2" cy="490.9" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1008.1" cy="461.1" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="1131.4" cy="471.0" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
-<circle cx="958.5" cy="457.8" r="4" fill="none" stroke="#343a46" stroke-width="1"/>
+<rect x="758" y="425" width="44" height="22" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<path d="M 758,447 L 802,447 L 780,535 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="745.9" y1="434.9" x2="758" y2="434.9" stroke="#343a46" stroke-width="1.6"/>
+<line x1="780" y1="414.0" x2="780" y2="425" stroke="#343a46" stroke-width="1.6"/>
+<text x="810" y="495.0" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="start">CL-101  Cyclone</text>
+<rect x="948.8" y="425" width="182.4000000000001" height="110" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
+<line x1="959.5999999999999" y1="425" x2="959.5999999999999" y2="535" stroke="#343a46" stroke-width="1.2"/>
+<line x1="1120.4" y1="425" x2="1120.4" y2="535" stroke="#343a46" stroke-width="1.2"/>
+<path class="trunnion" d="M 948.8,455.2 L 937.3,455.2 L 937.3,464.6 L 920,464.6 L 920,495.4 L 937.3,495.4 L 937.3,504.8 L 948.8,504.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<path class="trunnion" d="M 1131.2,455.2 L 1142.7,455.2 L 1142.7,464.6 L 1160,464.6 L 1160,495.4 L 1142.7,495.4 L 1142.7,504.8 L 1131.2,504.8 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.6"/>
+<circle class="charge" cx="966.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="978.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="989.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1001.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1012.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1024.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1035.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1047.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1058.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1070.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1081.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1093.1" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1104.6" cy="528.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="971.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="983.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="994.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1006.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1017.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1029.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1040.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1052.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1063.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1075.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1086.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1098.1" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
+<circle class="charge" cx="1109.6" cy="519.4" r="5.0" fill="#ffffff" stroke="#343a46" stroke-width="1"/>
 <text x="1040.0" y="557" font-size="10.5" font-weight="bold" fill="#111418" text-anchor="middle">ML-102  Ball Mill</text>
 <path d="M 210,480 L 280,480" fill="none" stroke="#9c8552" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aSolids)"/>
 <path d="M 520,480 L 590,480 L 590,515 L 634,515" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
 <text x="555" y="468" font-size="8.5" font-weight="normal" fill="#5a6472" text-anchor="middle">+ water</text>
-<path d="M 666,515 L 720,515 L 720,490 L 750,490" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
-<path d="M 780,550 L 780,600 L 920,600 L 920,510" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 666,515 L 720,515 L 720,434.9 L 745.9,434.9" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 780,535 L 780,600 L 906,600 L 906,480 L 920,480" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
 <path d="M 1160,480 L 1200,480 L 1200,640 L 650,640 L 650,547" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
 <text x="920" y="658" font-size="8.5" font-weight="normal" fill="#5a6472" text-anchor="middle">Ball mill discharge to sump (closed circuit)</text>
-<path d="M 780,400 L 780,370 L 1450,370 L 1450,655" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
+<path d="M 780,414.0 L 780,370 L 1450,370 L 1450,655" fill="none" stroke="#7a5230" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#aOre)"/>
 <text x="1100" y="360" font-size="9" font-weight="normal" fill="#5a6472" text-anchor="middle">Cyclone overflow to flotation</text>
 <path d="M 1370,655 L 1520,655 L 1520,665 L 1530,665 L 1530,760 L 1370,760 Z" fill="#f7f8fa" stroke="#343a46" stroke-width="1.8"/>
 <line x1="1445.0" y1="625" x2="1445.0" y2="746" stroke="#343a46" stroke-width="2"/>

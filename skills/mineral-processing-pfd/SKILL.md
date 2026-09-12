@@ -47,11 +47,16 @@ Write out the coordinate plan first, same discipline as `pfd-generator`:
 `scripts/pid_lib.py` provides the primitives. Read it before writing the script and use it rather than reinventing symbols. It has two layers:
 
 - **Generic** (forked from `pfd-generator`, unchanged behavior): `pipe`, `sig`, `lead`, `line_jump`, `bubble`, `cvalve`, `manual_valve`, `vessel`, `agitator`, `equip_tag`, `legend`, `title`, `notes`, `design_basis`, `revision`.
-- **Mineral-processing equipment** (new): `rock_breaker`, `feeder_vibrating`, `crusher_jaw`, `crusher_cone`, `crusher_gyratory`, `crusher_vsi`, `crusher_impact`, `crusher_roll`, `screen` (parametric, 1–4 decks, wet/dry), `mill_sag`, `mill_ball`, `cyclone`, `classifier_screw`, `classifier_rake`, `flotation_cell`, `flotation_column`, `thickener`, `filter_drum`, `pump_centrifugal`, `pump_sump`, `feeder_apron`, `conveyor`, `ore_bin`, `stockpile`, `silo`, `tailings_dam`, `splitter`.
+- **Mineral-processing equipment** (new): `rock_breaker`, `feeder_vibrating`, `crusher_jaw`, `crusher_cone`, `crusher_gyratory`, `crusher_vsi`, `crusher_impact`, `crusher_roll`, `screen` (parametric, 1–4 decks, wet/dry), `mill_sag`, `mill_ball` (trunnions + charge; `x0..x1` is the outer envelope including the trunnions), `cyclone`, `classifier_screw`, `classifier_rake`, `flotation_cell`, `flotation_column`, `thickener`, `filter_drum`, `pump_centrifugal`, `pump_sump`, `feeder_apron`, `conveyor`, `ore_bin`, `stockpile`, `silo`, `tailings_dam`, `splitter`, `junction`.
 
 Read `references/mineral-processing-symbols.md` for what each symbol represents, its source-standard code, and known caveats (in particular: `crusher_roll` is the closest match for HPGR, not a literal HPGR-specific symbol — say so if the drawing includes one).
 
 **Every equipment primitive draws only its body — never its own inlet/outlet pipe stubs.** Connect equipment with `pipe()` yourself, in `ORE` (slurry) or `SOLIDS` (dry/conveyed ore) as appropriate, `BLUE` for wash/process water. Each primitive's docstring gives the coordinates of its notable connection points (feed, discharge, overflow, underflow).
+
+Two composition rules the primitives cannot enforce for you:
+
+- **Every screen deck outlet gets a pipe.** `screen()` returns one oversize `y` per deck; a `deck_count` screen has `deck_count + 1` product streams (each deck's oversize plus the undersize). Pipe every one of them — a deck outlet left hanging is a defect an engineer will spot immediately, not a simplification. Where two oversizes go to the same place (the usual closed-circuit case), merge them at a `junction()` and run one line.
+- **Size a cyclone to its neighbours.** `cyclone()` takes `top`/`bottom` from you; make it about the height of the adjacent mill or sump, never taller, and keep the standard's tall-narrow proportion — the cylinder is `r` high, so give the cone at least ~3`r`. It returns its `feed`/`overflow`/`underflow` points — start and end your pipes on those.
 
 Reuse the ISA-5.1 instrumentation primitives (`bubble`, `cvalve`, `sig`) for any control loop exactly as `pfd-generator` does — the source standard defines no ore-dressing-specific instrumentation of its own, so there's nothing to substitute.
 

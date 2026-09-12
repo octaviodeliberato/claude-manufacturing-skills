@@ -22,15 +22,15 @@ equipment by name or a simple per-drawing tag instead (see `CONTEXT.md`, "Equipm
 | `CR-VO` | VSI – Rock to Rock (Barmac Type) | `crusher_vsi(cx, cy, tag=None)` | Vertical shaft impactor |
 | `CR-IO` | Impact Crusher | `crusher_impact(cx, cy, tag=None)` | Horizontal shaft impactor by elimination — the standard doesn't name "HSI" explicitly, but `CR-VO` is called out separately as the vertical-shaft type |
 | `CR-RR` | Roll Crusher | `crusher_roll(cx, top, bottom, tag=None)` | **HPGR caveat**: this is the standard's closest match for a high-pressure grinding roll, not a literal HPGR-specific symbol. The 2010 standard predates HPGR's widespread adoption; its "Roll Crusher" entry reads as a conventional smooth-roll crusher. Say so explicitly whenever this symbol is used to represent HPGR. |
-| *(none — new parametric symbol)* | Vibrating Screen | `screen(x0, y0, x1, y1, deck_count=1, wet=False, tag=None)` | The standard's `SD-VO`/`SD-DD` don't cleanly encode deck count as distinct icon geometry (both render with the same 3-outlet layout); this primitive draws `deck_count` (1–4) internal mesh lines instead, each with its own oversize outlet. `wet=True` only changes the label — the composing script draws the wash-water inlet pipe itself. Not `SD-DW`/`SD-HY`, which are separate, distinctly-coded equipment (a wash chute and a static hydro-strainer basket), not a wet mode of this screen. |
-| `ML-SA` | Semi-Autogenous (SAG) Mill | `mill_sag(x0, y0, x1, y1, tag=None)` | Few large charge circles |
-| `ML-BA` | Ball Mill | `mill_ball(x0, y0, x1, y1, tag=None)` | Many small charge circles |
+| *(none — new parametric symbol)* | Vibrating Screen | `screen(x0, y0, x1, y1, deck_count=1, wet=False, tag=None)` | The standard's `SD-VO`/`SD-DD` don't cleanly encode deck count as distinct icon geometry (both render with the same 3-outlet layout); this primitive draws `deck_count` (1–4) internal mesh lines instead, each with its own oversize outlet — a `deck_count` screen has `deck_count + 1` product streams and the composing script must pipe every one of them. `wet=True` only changes the label — the composing script draws the wash-water inlet pipe itself. Not `SD-DW`/`SD-HY`, which are separate, distinctly-coded equipment (a wash chute and a static hydro-strainer basket), not a wet mode of this screen. |
+| `ML-SA` | Semi-Autogenous (SAG) Mill | `mill_sag(x0, y0, x1, y1, tag=None)` | Flat elevation after the standard's icon: shell with end-plate bands, a stepped trunnion at each end, one row of large charge lumps along the floor. The standard's own `ML-SA` shows no charge; ours does so SAG and ball mills stay distinguishable at flowsheet scale. `x0..x1` is the outer envelope *including* trunnions — feed at `(x0, cy)`, discharge at `(x1, cy)`, the shell inset between them |
+| `ML-BA` | Ball Mill | `mill_ball(x0, y0, x1, y1, tag=None)` | Same construction as `ML-SA`; two packed rows of small ball charge along the floor. Charge packing is deterministic — no RNG — so re-running a script never moves it |
 
 ## Classification / Separation
 
 | Code | Standard's title | Primitive | Notes |
 |---|---|---|---|
-| `CL-HY` | Hydrocyclone | `cyclone(cx, top, bottom, tag=None)` | |
+| `CL-HY` | Hydrocyclone | `cyclone(cx, top, bottom, tag=None, r=22)` | Tall and narrow like the icon — the cylinder is `r` high, so give the cone at least ~3`r`. The inlet nozzle and vortex-finder stub are part of the symbol (the icon draws both), not pipes; they scale with `r`. Returns `{feed, overflow, underflow}` connection points. Size it level with the adjacent mill — not taller. Tag is placed beside the cone so it never sits on the underflow line |
 | `CL-SC` | Screw Classifier | `classifier_screw(x0, y0, x1, y1, tag=None)` | |
 | `CL-RO` | Rake Classifier | `classifier_rake(x0, y0, x1, y1, tag=None)` | |
 | `FL-MC` | Mechanical Flotation Cell with Agitator | `flotation_cell(x0, y0, x1, y1, tag=None)` | |
@@ -56,6 +56,7 @@ equipment by name or a simple per-drawing tag instead (see `CONTEXT.md`, "Equipm
 | `GE-SO` | Silo | `silo(cx, top, bottom, tag=None)` | |
 | `GE-TD` | Downstream Tailings Dam | `tailings_dam(x0, base_y, tag=None)` | Distinct from `GE-TC`/`GE-TU` (centerline/upstream construction methods) — not shipped |
 | `OP-SO` | Output Splitter | `splitter(cx, cy, n_outputs=2, tag=None)` | 2 or 3 outbound legs |
+| *(none — merge node)* | Stream junction | `junction(cx, cy)` | The same dot as `splitter`, for two streams joining into one (e.g. both oversizes of a 2-deck screen into one recycle line). The joining pipe ends on the dot with no arrowhead; the through-line passes over it |
 
 ## Out of scope for this symbol set
 

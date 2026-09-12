@@ -98,6 +98,9 @@ Run this against the rendered PNG, not the code. Zoom into every dense cluster a
 - [ ] Arrowheads land at the vessel wall, not inside it
 - [ ] No stray arrowheads mid-run
 - [ ] Nozzles on flat wall sections
+- [ ] Mill feed/discharge arrows land on the trunnion faces at `(x0, cy)` / `(x1, cy)`, not on the shell or in the gap beside a trunnion
+- [ ] Every screen deck outlet is piped: `deck_count` oversize lines plus one undersize, none left hanging
+- [ ] Cyclone no taller than the mill or sump beside it; its tag sits beside the cone, clear of the underflow line
 - [ ] Nozzle elevations physically correct against the liquid level
 
 **Instruments and loops**

@@ -35,11 +35,17 @@ d.pipe(f"M 860,{Y1-10} L 890,{Y1-30} L {screen_x0},{Y1-30}", d.SOLIDS, arrow=Tru
 fx = (screen_x0 + screen_x1) / 2
 d.pipe(f"M {fx},{Y1+45+30} L {fx},{Y1+95} L 1130,{Y1+95} L 1130,{Y1+55}", d.SOLIDS, arrow=True)
 d.pipe(f"M 1240,{Y1-10} L 1290,{Y1-40} L 1340,{Y1-40} L 1340,{Y1}", d.SOLIDS, arrow=True)
-# screen oversize (deck 1, top) recycles back to the cone crusher feed - drawn
-# as a loop above the row so it never crosses the main left-to-right flow
+# screen oversize recycles back to the cone crusher feed - drawn as a loop above
+# the row so it never crosses the main left-to-right flow. A 2-deck screen has
+# TWO oversize streams (one per deck); the top deck only scalps to protect the
+# bottom deck, so both are "too coarse" and both recycle: the bottom-deck line
+# joins the top-deck line at a junction on the riser, then one loop carries both.
 recycle_y = Y1 - 110
-d.pipe(f"M {screen_x1},{deck_ys[0]} L {screen_x1+40},{deck_ys[0]} "
-       f"L {screen_x1+40},{recycle_y} L 680,{recycle_y} L 680,{Y1-60}", d.SOLIDS, arrow=True)
+riser_x = screen_x1 + 40
+d.pipe(f"M {screen_x1},{deck_ys[0]} L {riser_x},{deck_ys[0]} "
+       f"L {riser_x},{recycle_y} L 680,{recycle_y} L 680,{Y1-60}", d.SOLIDS, arrow=True)
+d.pipe(f"M {screen_x1},{deck_ys[1]} L {riser_x},{deck_ys[1]} L {riser_x},{deck_ys[0]}", d.SOLIDS)
+d.junction(riser_x, deck_ys[0])
 d.txt((screen_x1 + 680) / 2 + 40, recycle_y - 8, "Oversize recycle", size=9, fill=d.SUB, anchor="middle")
 
 # ==================================================== Row 1->2 transfer corridor
@@ -56,21 +62,27 @@ d.pipe(f"M 1340,{Y1+90} L 1340,{Y_TRANSFER} L 150,{Y_TRANSFER} L 150,{Y2-15}", d
 d.feeder_apron(90, Y2 - 15, 210, Y2 + 15, tag="FD-102  Reclaim Feeder")
 d.mill_sag(280, Y2 - 55, 520, Y2 + 55, tag="ML-101  SAG Mill")
 d.pump_sump(650, Y2 + 35, tag="PU-101  Sump Pump")
-d.cyclone(780, Y2 - 80, Y2 + 70, tag="CL-101  Cyclone")
+# sized level with the mills either side (SKILL.md: a cyclone is about the height
+# of the adjacent mill, never taller); cyc holds its feed/overflow/underflow points
+cyc = d.cyclone(780, Y2 - 55, Y2 + 55, tag="CL-101  Cyclone")
 d.mill_ball(920, Y2 - 55, 1160, Y2 + 55, tag="ML-102  Ball Mill")
 
 d.pipe(f"M 210,{Y2} L 280,{Y2}", d.SOLIDS, arrow=True)
 d.pipe(f"M 520,{Y2} L 590,{Y2} L 590,{Y2+35} L 634,{Y2+35}", d.ORE, arrow=True)
 d.txt(555, Y2 - 12, "+ water", size=8.5, fill=d.SUB, anchor="middle")
-d.pipe(f"M 666,{Y2+35} L 720,{Y2+35} L 720,{Y2+10} L 750,{Y2+10}", d.ORE, arrow=True)
-# cyclone underflow -> ball mill; ball mill discharge -> back to sump pump (closed circuit)
-d.pipe(f"M 780,{Y2+70} L 780,{Y2+120} L 920,{Y2+120} L 920,{Y2+30}", d.ORE, arrow=True)
+cfx, cfy = cyc["feed"]
+d.pipe(f"M 666,{Y2+35} L 720,{Y2+35} L 720,{cfy} L {cfx},{cfy}", d.ORE, arrow=True)
+# cyclone underflow -> ball mill feed trunnion at (920, Y2); the riser sits at 906,
+# just clear of the cyclone tag, so the arrow lands on the trunnion face
+ux, uy = cyc["underflow"]
+d.pipe(f"M {ux},{uy} L {ux},{Y2+120} L 906,{Y2+120} L 906,{Y2} L 920,{Y2}", d.ORE, arrow=True)
 d.pipe(f"M 1160,{Y2} L 1200,{Y2} L 1200,{Y2+160} L 650,{Y2+160} L 650,{Y2+67}", d.ORE, arrow=True)
 d.txt(920, Y2 + 178, "Ball mill discharge to sump (closed circuit)", size=8.5, fill=d.SUB, anchor="middle")
 # cyclone overflow (final grind product) up and over to flotation row - its own
 # elevation (Y2-110), clear of the transfer corridor above at Y_TRANSFER (350)
 Y3 = 700
-d.pipe(f"M 780,{Y2-80} L 780,{Y2-110} L 1450,{Y2-110} L 1450,{Y3-45}", d.ORE, arrow=True)
+ox, oy = cyc["overflow"]
+d.pipe(f"M {ox},{oy} L {ox},{Y2-110} L 1450,{Y2-110} L 1450,{Y3-45}", d.ORE, arrow=True)
 d.txt(1100, Y2 - 120, "Cyclone overflow to flotation", size=9, fill=d.SUB, anchor="middle")
 
 # ================================================ Row 3: flotation + dewatering

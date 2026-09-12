@@ -33,7 +33,6 @@ never fights the surrounding layout. Each primitive's docstring gives the
 coordinates of its notable connection points (feed, discharge, overflow...).
 """
 import math
-import random
 
 BLUE = "#1d4e89"    # process / wash water
 RUST = "#a34a28"    # steam / condensate
@@ -342,7 +341,10 @@ class PID:
     def screen(self, x0, y0, x1, y1, deck_count=1, wet=False, tag=None):
         """Vibrating screen, 1-4 decks. Body spans (x0,y0)-(x1, y0 + 0.7*h); each
         deck's oversize outlet is at (x1, dy) for dy in the returned list; the
-        final undersize outlet is at ((x0+x1)/2, y1). wet=True only changes the
+        final undersize outlet is at ((x0+x1)/2, y1). A deck_count screen has
+        deck_count + 1 product streams: the composing script must pipe EVERY
+        returned oversize outlet plus the undersize - a hanging deck outlet is
+        a defect, not a simplification. wet=True only changes the
         label - it does not draw a wash-water inlet; the composing script should
         route a BLUE pipe into the top span when wet=True. Distinct from SD-DW/
         SD-HY, which are separate pieces of equipment, not a wet mode of this one."""
@@ -367,53 +369,90 @@ class PID:
         return deck_ys
 
     def _mill(self, x0, y0, x1, y1, charge="balls", tag=None):
+        """Grinding mill in flat elevation, after the standard's ML-BA/ML-SA icons.
+        (x0,y0)-(x1,y1) is the OUTER envelope: a stepped trunnion block projects
+        from each end of the shell and its outer face sits exactly at x0 / x1,
+        so the feed and discharge points stay at (x0, cy) and (x1, cy). The shell
+        itself is inset by the trunnion width. Charge is packed in rows along the
+        bottom of the shell, deterministic (no RNG) so re-running the script never
+        moves it."""
+        w, h = x1 - x0, y1 - y0
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-        rx, ry = (x1 - x0) / 2, (y1 - y0) / 2
-        self.add(f'<rect x="{x0}" y="{y0}" width="{x1-x0}" height="{y1-y0}" '
+        tw = round(w * 0.12, 1)                # trunnion block width
+        sx0, sx1 = x0 + tw, x1 - tw            # shell extent
+        head = max(6, round(w * 0.045, 1))     # end-plate band width
+        self.add(f'<rect x="{sx0}" y="{y0}" width="{sx1-sx0}" height="{h}" '
                  f'fill="{SHELL}" stroke="{EQ}" stroke-width="1.8"/>')
-        for ex in (x0, x1):
-            self.add(f'<ellipse cx="{ex}" cy="{cy}" rx="{min(14, rx*0.3):.1f}" ry="{ry}" '
+        for hx in (sx0 + head, sx1 - head):
+            self.add(f'<line x1="{hx}" y1="{y0}" x2="{hx}" y2="{y1}" '
+                     f'stroke="{EQ}" stroke-width="1.2"/>')
+        # stepped trunnion: a bearing step 45% of h against the head, then the
+        # journal (28% of h) outside it, whose face sits on the envelope
+        step_half, journal_half = h * 0.45 / 2, h * 0.28 / 2
+        step_w = tw * 0.4
+        for sgn, ex, fx in ((-1, sx0, x0), (1, sx1, x1)):
+            mx = ex + sgn * step_w
+            self.add(f'<path class="trunnion" d="M {ex},{cy-step_half:.1f} L {mx:.1f},{cy-step_half:.1f} '
+                     f'L {mx:.1f},{cy-journal_half:.1f} L {fx},{cy-journal_half:.1f} L {fx},{cy+journal_half:.1f} '
+                     f'L {mx:.1f},{cy+journal_half:.1f} L {mx:.1f},{cy+step_half:.1f} L {ex},{cy+step_half:.1f} Z" '
                      f'fill="{SHELL}" stroke="{EQ}" stroke-width="1.6"/>')
-        rnd = random.Random(42)
-        n, rmax = (5, 9) if charge == "sag" else (14, 4)
-        for _ in range(n):
-            px = rnd.uniform(x0 + 20, x1 - 20)
-            py = rnd.uniform(cy - ry * 0.5, cy + ry * 0.5)
-            self.add(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="{rmax}" '
-                     f'fill="none" stroke="{EQ}" stroke-width="1"/>')
+        # charge: packed rows along the shell floor between the end plates
+        r = max(3, round(h * 0.09 if charge == "sag" else h * 0.045, 1))
+        rows = 1 if charge == "sag" else 2
+        left, right = sx0 + head + r + 2, sx1 - head - r - 2
+        step_x = 2 * r + 1.5
+        for row in range(rows):
+            py = y1 - 1.6 - r - row * (2 * r - 1)
+            px = left + (row % 2) * r
+            while px <= right:
+                self.add(f'<circle class="charge" cx="{px:.1f}" cy="{py:.1f}" r="{r}" '
+                         f'fill="#ffffff" stroke="{EQ}" stroke-width="1"/>')
+                px += step_x
         if tag:
             self.txt(cx, y1 + 22, tag, size=10.5, weight="bold", anchor="middle")
 
     def mill_sag(self, x0, y0, x1, y1, tag=None):
-        """SAG mill: horizontal drum with a few large ore/steel charge circles.
-        Feed enters the left trunnion (x0, cy); product discharges the right
-        trunnion (x1, cy)."""
+        """SAG mill: shell with trunnions and a single row of large charge lumps. Feed enters the left trunnion face (x0, cy); product
+        discharges the right trunnion face (x1, cy). x0..x1 is the outer envelope
+        including the trunnions - see _mill()."""
         self._mill(x0, y0, x1, y1, charge="sag", tag=tag)
 
     def mill_ball(self, x0, y0, x1, y1, tag=None):
-        """Ball mill: horizontal drum with many small steel-ball charge circles.
-        Feed enters the left trunnion (x0, cy); product discharges the right
-        trunnion (x1, cy)."""
+        """Ball mill: shell with trunnions and two packed rows of small steel-ball
+        charge. Feed enters the left trunnion face (x0, cy); product discharges the
+        right trunnion face (x1, cy). x0..x1 is the outer envelope including the
+        trunnions - see _mill()."""
         self._mill(x0, y0, x1, y1, charge="balls", tag=tag)
 
     # ------------------------------------------------------ classification/flotation
-    def cyclone(self, cx, top, bottom, tag=None, r=30):
-        """Hydrocyclone: cylindrical top, conical bottom. Tangential feed enters at
-        (cx-r, top+14); overflow exits up at (cx, top-14); underflow (apex)
-        discharges at (cx, bottom)."""
+    def cyclone(self, cx, top, bottom, tag=None, r=22):
+        """Hydrocyclone: cylindrical top (height r), conical bottom, after the
+        standard's CL-HY icon. Keep it tall and narrow - cone at least ~3r - and
+        size it to the equipment beside it: about the height of an adjacent
+        mill, not taller. The short tangential inlet nozzle and the vortex-finder
+        stub are part of the symbol (the standard's icon draws both), not pipes -
+        the composing script still draws every pipe itself, starting or ending
+        at the points this returns: {"feed", "overflow", "underflow"} -> (x, y),
+        the outer end of each nozzle and the apex. Both nozzles scale with r."""
         neck = top + r
         self.add(f'<rect x="{cx-r}" y="{top}" width="{2*r}" height="{neck-top}" '
                  f'fill="{SHELL}" stroke="{EQ}" stroke-width="1.8"/>')
         self.add(f'<path d="M {cx-r},{neck} L {cx+r},{neck} L {cx},{bottom} Z" '
                  f'fill="{SHELL}" stroke="{EQ}" stroke-width="1.8"/>')
         # tangential feed nozzle (short stub on the shell, feed pipe attaches here)
-        self.add(f'<line x1="{cx-r-16}" y1="{top+14}" x2="{cx-r}" y2="{top+14}" '
+        feed_y, inlet_len, finder_len = top + r * 0.45, r * 0.55, r * 0.5
+        self.add(f'<line x1="{cx-r-inlet_len:.1f}" y1="{feed_y:.1f}" x2="{cx-r}" y2="{feed_y:.1f}" '
                  f'stroke="{EQ}" stroke-width="1.6"/>')
-        # overflow pipe stub up from the vortex finder
-        self.add(f'<line x1="{cx}" y1="{top-14}" x2="{cx}" y2="{top}" '
+        # vortex finder up out of the lid
+        self.add(f'<line x1="{cx}" y1="{top-finder_len:.1f}" x2="{cx}" y2="{top}" '
                  f'stroke="{EQ}" stroke-width="1.6"/>')
+        # tag beside the cone, not under the apex - the underflow line always
+        # leaves the apex straight down and would run through a label there
         if tag:
-            self.txt(cx, bottom + 20, tag, size=10.5, weight="bold", anchor="middle")
+            self.txt(cx + r + 8, (neck + bottom) / 2 + 4, tag, size=10.5, weight="bold")
+        return {"feed": (round(cx - r - inlet_len, 1), round(feed_y, 1)),
+                "overflow": (cx, round(top - finder_len, 1)),
+                "underflow": (cx, bottom)}
 
     def classifier_screw(self, x0, y0, x1, y1, tag=None):
         """Inclined trough with a screw conveyor. Fine overflow discharges the low
@@ -630,9 +669,19 @@ class PID:
         outbound pipes with pipe(), all starting exactly at (cx, cy), in the
         process-stream color. Kept as a separate primitive (rather than a bare
         circle) so a splitter reads as a deliberate symbol, not a stray dot."""
-        self.add(f'<circle cx="{cx}" cy="{cy}" r="3.5" fill="{EQ}"/>')
+        self._node(cx, cy)
         if tag:
             self.txt(cx, cy - 14, tag, size=9.5, weight="bold", anchor="middle")
+
+    def junction(self, cx, cy):
+        """Merge node where two process streams join into one - the same dot as
+        splitter(), so splits and merges read as the same kind of node. Draws no
+        lines: the composing script ends the joining pipe here (no arrowhead) and
+        the through-line passes over the dot."""
+        self._node(cx, cy)
+
+    def _node(self, cx, cy):
+        self.add(f'<circle cx="{cx}" cy="{cy}" r="3.5" fill="{EQ}"/>')
 
     # ---------------------------------------------------------------- sheet furniture
     def notes(self, x, y, heading, bullets, size=9.5):

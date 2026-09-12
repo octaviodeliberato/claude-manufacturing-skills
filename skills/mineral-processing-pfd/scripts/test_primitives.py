@@ -9,6 +9,7 @@ render-and-inspect step (SKILL.md) as the real acceptance test. Run with:
 
     python3 scripts/test_primitives.py
 """
+import re
 import sys
 import xml.etree.ElementTree as ET
 
@@ -115,20 +116,70 @@ def test_screen_decks():
     for n in (1, 2, 3, 4):
         for wet in (False, True):
             d = PID()
-            d.screen(150, 100, 350, 200, deck_count=n, wet=wet, tag=f"SD-{n}{'W' if wet else 'D'}")
+            deck_ys = d.screen(150, 100, 350, 200, deck_count=n, wet=wet, tag=f"SD-{n}{'W' if wet else 'D'}")
             standard_checks(d)
+            # one oversize outlet per deck, top deck first, all inside the body -
+            # the composing script must pipe every one of them (deck count + 1 streams)
+            assert len(deck_ys) == n, f"{n}-deck screen returned {len(deck_ys)} outlets"
+            assert deck_ys == sorted(deck_ys), "deck outlets must be top-down"
+            assert all(100 < y < 170 for y in deck_ys), f"outlet outside body: {deck_ys}"
+
+
+def _elements(d, tag, cls):
+    """Emitted `<tag ...>` elements carrying class="cls"."""
+    return [s for s in d.o if s.startswith(f"<{tag}") and f'class="{cls}"' in s]
+
+
+def _mill_charge(d):
+    return _elements(d, "circle", "charge")
+
+
+def _mill_trunnions(d):
+    return _elements(d, "path", "trunnion")
 
 
 def test_mill_sag():
     d = PID()
     d.mill_sag(200, 300, 420, 380, tag="ML-101")
     standard_checks(d)
+    assert len(_mill_trunnions(d)) == 2, "SAG mill must draw a trunnion at each end"
+    assert _mill_charge(d), "SAG mill must draw a charge"
 
 
 def test_mill_ball():
     d = PID()
     d.mill_ball(200, 300, 420, 380, tag="ML-102")
     standard_checks(d)
+    assert len(_mill_trunnions(d)) == 2, "ball mill must draw a trunnion at each end"
+    assert _mill_charge(d), "ball mill must draw a charge"
+
+
+def test_mill_charge_distinguishes_sag_from_ball():
+    """The only visual difference between the two mills is the charge: a SAG mill
+    shows a few large lumps, a ball mill many small balls (CONTEXT.md: mill charge)."""
+    sag, ball = PID(), PID()
+    sag.mill_sag(200, 300, 420, 380)
+    ball.mill_ball(200, 300, 420, 380)
+    assert len(_mill_charge(sag)) < len(_mill_charge(ball))
+
+
+def test_mill_charge_sits_at_the_bottom():
+    d = PID()
+    d.mill_ball(200, 300, 420, 380)
+    cys = [float(re.search(r'cy="([\d.]+)"', s).group(1)) for s in _mill_charge(d)]
+    assert cys, "no charge drawn"
+    assert all(cy > 340 for cy in cys), f"charge circles above the shell centreline: {cys}"
+
+
+def test_mill_trunnions_reach_the_envelope():
+    """x0..x1 is the OUTER envelope: the trunnion faces sit exactly at x0 and x1 so
+    (x0, cy)/(x1, cy) remain the documented feed/discharge points."""
+    d = PID()
+    d.mill_sag(200, 300, 420, 380)
+    joined = " ".join(_mill_trunnions(d))
+    assert "M 200," in joined or "L 200," in joined, "left trunnion face must touch x0"
+    assert "M 420," in joined or "L 420," in joined, "right trunnion face must touch x1"
+    assert not any(s.startswith("<ellipse") for s in d.o), "flat elevation: no drum ellipses"
 
 
 COMMINUTION_TESTS = [
@@ -143,6 +194,9 @@ COMMINUTION_TESTS = [
     ("screen (1-4 deck, wet/dry)", test_screen_decks),
     ("mill_sag", test_mill_sag),
     ("mill_ball", test_mill_ball),
+    ("mill charge: SAG < ball", test_mill_charge_distinguishes_sag_from_ball),
+    ("mill charge at the bottom", test_mill_charge_sits_at_the_bottom),
+    ("mill trunnions at x0/x1", test_mill_trunnions_reach_the_envelope),
 ]
 
 # ---------------------------------------------------------- classification/flotation
@@ -151,6 +205,24 @@ def test_cyclone():
     d = PID()
     d.cyclone(200, 100, 220, tag="CL-101")
     standard_checks(d)
+
+
+def test_cyclone_stubs_scale_with_r():
+    """Feed and overflow stubs are proportional to r, so a small cyclone doesn't
+    grow oversized nozzles. Stub length is read back from the emitted <line>s."""
+    def stub_lengths(r):
+        d = PID()
+        d.cyclone(200, 100, 220, r=r)
+        lens = []
+        for s in d.o:
+            if s.startswith("<line"):
+                x1, y1, x2, y2 = (float(re.search(f'{k}="(-?[\\d.]+)"', s).group(1))
+                                  for k in ("x1", "y1", "x2", "y2"))
+                lens.append(abs(x2 - x1) + abs(y2 - y1))
+        return lens
+    small, big = stub_lengths(15), stub_lengths(30)
+    assert len(small) == len(big) == 2
+    assert all(a < b for a, b in zip(small, big)), f"stubs did not scale: {small} vs {big}"
 
 
 def test_classifier_screw():
@@ -179,6 +251,7 @@ def test_flotation_column():
 
 CLASSIFICATION_TESTS = [
     ("cyclone", test_cyclone),
+    ("cyclone stubs scale with r", test_cyclone_stubs_scale_with_r),
     ("classifier_screw", test_classifier_screw),
     ("classifier_rake", test_classifier_rake),
     ("flotation_cell", test_flotation_cell),
@@ -247,6 +320,13 @@ def test_tailings_dam():
     standard_checks(d)
 
 
+def test_junction():
+    d = PID()
+    d.junction(200, 200)
+    standard_checks(d)
+    assert sum(s.startswith("<circle") for s in d.o) == 1
+
+
 def test_splitter():
     d = PID()
     d.splitter(200, 200, n_outputs=2, tag="OP-101")
@@ -268,6 +348,7 @@ DEWATERING_TRANSPORT_TESTS = [
     ("silo", test_silo),
     ("tailings_dam", test_tailings_dam),
     ("splitter", test_splitter),
+    ("junction", test_junction),
 ]
 
 ALL_TESTS = list(COMMINUTION_TESTS) + CLASSIFICATION_TESTS + DEWATERING_TRANSPORT_TESTS
