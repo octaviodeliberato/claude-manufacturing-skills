@@ -23,7 +23,8 @@ desktop.ini
 
 # Local agent tooling (matt-pocock skills install, Claude Code project config
 # and instructions) — per-developer, not part of the shipped skills
-/.claude/
+/.claude/*
+!/.claude/settings.json
 /.agents/
 /docs/agents/
 /skills-lock.json
