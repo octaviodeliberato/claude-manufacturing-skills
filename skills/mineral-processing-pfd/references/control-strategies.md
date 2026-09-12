@@ -43,7 +43,9 @@ existing `pfd-generator` convention (master signal lands on the slave controller
 ### Loop tag numbering
 
 100-series for crushing, 200-series for grinding (SAG and ball mill/cyclone share the 200 range),
-matching the shipped examples' `LV-201` / `WIC-201` style.
+matching the shipped examples' `LV-201` / `WIC-201` style. The `2xN` numbers in the tables below are
+the shipped example's assignments; SAG and ball-mill/cyclone loops share one sequence, so optional
+loops (mill speed, pebble crusher) take the next free number rather than a fixed one.
 
 ---
 
@@ -74,9 +76,9 @@ feeder speed, CSS in setting or load mode as **one** controller, surge-bin level
 | Mill inlet water | `FT/FIC-2x2` | Water flow (`FT`) | `FIC` | Water control valve (**VALVE**) | Hold inlet water at setpoint | Slave of the water-to-ore ratio (intermediate) | Water header along the bottom, `cvalve(actuator="above")`, joins the feed chute at a `junction` | §3.1 [LeRoux2019 p.14] |
 | Mill load | `WT/WIC-2x3` (load cells) or `PT/PIC-2x3` (bearing pressure) | Mill weight or bearing oil pressure | `WIC` / `PIC` | Feed-rate setpoint of the fresh-feed `WIC` → feeder `motor` through it (**DRIVE SPEED**) | Keep mill load in its target range | Master over the fresh-feed loop | Transmitter on a lead from the shell; controller beside the feed `WIC`; one horizontal signal landing on the feed `WIC`, marked "SP" | §3.1, §3 key statements [Forbes&Gough pp.6–7; LeRoux2019 p.10] |
 | Mill power | `JT/JI-2x4` | Motor power kW (`JT`) | `JI` (+ high alarm) | — (**MONITOR**) | Do not exceed maximum power | — | `JT` on a lead from the shell, `JI` above it; no outgoing signal | §3.1 [Forbes&Gough p.6] |
-| Mill speed *(only if VSD)* | `ST/SIC-2x5` | Fraction of critical speed (`ST`) | `SIC` | Mill drive VSD → mill `motor` (**DRIVE SPEED**) | Operator-set speed target | — | `motor` on the mill trunnion drive end; omit entirely on a fixed-speed mill and say so | §3.1 [LeRoux2019 p.37] |
-| Pebble crusher *(optional)* | `JT/JIC` or `PT/PIC` → `ZIC-2x6` | Crusher power or hydroset pressure | `JIC`/`PIC` → `ZIC` | CSS (**CRUSHER SETTING**) | Run in power/pressure-limited mode | — | `ZIC` with a `sig` ending on the crusher body | §3.1 [Hulthen2010 p.23] |
-| Pebble recycle tonnage *(optional)* | `WT/WI-2x7` | Belt scale on pebble return | `WI` | — (**MONITOR**) | Measurement for feedforward at higher tiers | — | Indicator only | §3.1 [Gough p.7; HoneywellSAG p.5] |
+| Mill speed *(only if VSD)* | `ST/SIC` (next free 200-series number) | Fraction of critical speed (`ST`) | `SIC` | Mill drive VSD → mill `motor` (**DRIVE SPEED**) | Operator-set speed target | — | `motor` on the mill trunnion drive end; omit entirely on a fixed-speed mill and say so | §3.1 [LeRoux2019 p.37] |
+| Pebble crusher *(optional)* | `JT/JIC` or `PT/PIC` → `ZIC` (next free number) | Crusher power or hydroset pressure | `JIC`/`PIC` → `ZIC` | CSS (**CRUSHER SETTING**) | Run in power/pressure-limited mode | — | `ZIC` with a `sig` ending on the crusher body | §3.1 [Hulthen2010 p.23] |
+| Pebble recycle tonnage *(optional)* | `WT/WI` (next free number) | Belt scale on pebble return | `WI` | — (**MONITOR**) | Measurement for feedforward at higher tiers | — | Indicator only | §3.1 [Gough p.7; HoneywellSAG p.5] |
 
 Caveats for the SAG basic tier:
 

@@ -47,7 +47,7 @@ Write out the coordinate plan first, same discipline as `pfd-generator`:
 
 `scripts/pid_lib.py` provides the primitives. Read it before writing the script and use it rather than reinventing symbols. It has two layers:
 
-- **Generic** (forked from `pfd-generator`, unchanged behavior): `pipe`, `sig`, `lead`, `line_jump`, `bubble`, `cvalve`, `manual_valve`, `vessel`, `agitator`, `equip_tag`, `legend`, `title`, `notes`, `design_basis`, `revision`; plus `motor` (ISA drive symbol, the final element for speed loops — new here, not in `pfd-generator`).
+- **Generic** (forked from `pfd-generator`, unchanged behavior apart from `legend`'s `density` flag): `pipe`, `sig`, `lead`, `line_jump`, `bubble`, `cvalve`, `manual_valve`, `vessel`, `agitator`, `equip_tag`, `legend`, `title`, `notes`, `design_basis`, `revision`; plus `motor` (ISA drive symbol, the final element for speed loops — new here, not in `pfd-generator`).
 - **Mineral-processing equipment** (new): `rock_breaker`, `feeder_vibrating`, `crusher_jaw`, `crusher_cone`, `crusher_gyratory`, `crusher_vsi`, `crusher_impact`, `crusher_roll`, `screen` (parametric, 1–4 decks, wet/dry), `mill_sag`, `mill_ball` (trunnions + charge; `x0..x1` is the outer envelope including the trunnions), `cyclone`, `classifier_screw`, `classifier_rake`, `flotation_cell`, `flotation_column`, `thickener`, `filter_drum`, `pump_centrifugal`, `pump_sump`, `feeder_apron`, `conveyor`, `ore_bin`, `stockpile`, `silo`, `tailings_dam`, `splitter`, `junction`.
 
 Read `references/mineral-processing-symbols.md` for what each symbol represents, its source-standard code, and known caveats (in particular: `crusher_roll` is the closest match for HPGR, not a literal HPGR-specific symbol — say so if the drawing includes one).

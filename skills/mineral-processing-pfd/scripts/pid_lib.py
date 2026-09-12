@@ -7,8 +7,10 @@ docs/adr/0001-mineral-processing-pfd-forks-primitives.md for why this is a
 fork, not a shared import: skills are zipped and distributed one at a time,
 so a runtime cross-skill import isn't viable). The generic drawing
 primitives below (palette, markers, pipe/sig/bubble/cvalve/legend/vessel/
-agitator, PID scaffold) are unchanged from that fork point. Everything from
-"mineral-processing equipment" onward is new.
+agitator, PID scaffold) are unchanged from that fork point, with two
+additions for control strategies: motor() (ISA drive symbol) and the
+legend(density=True) declaration. Everything from "mineral-processing
+equipment" onward is new.
 
 Usage:
     from pid_lib import PID
@@ -718,7 +720,7 @@ class PID:
         for label, color, dashed in entries:
             dash = ' stroke-dasharray="7,5.5"' if dashed else ''
             wgt = 1.6 if dashed else 2.8
-            self.add(f'<line x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
+            self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
                      f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
             self.txt(cx + 55, y + 5, esc(label), size=size, fill=SUB)
             cx += max(gap, 55 + text_width(label, size) + 40)

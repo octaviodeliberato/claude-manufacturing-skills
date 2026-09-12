@@ -4,8 +4,10 @@ Smoke tests for pid_lib's mineral-processing primitives.
 
 No pytest dependency - this repo has no test framework anywhere else, and
 the seam agreed for this skill (see spec) is: call each primitive, assert
-structural invariants on the SVG it produces, then rely on the mandatory
-render-and-inspect step (SKILL.md) as the real acceptance test. Run with:
+structural invariants on the SVG it produces - plus one drawing-level test
+per shipped control-strategy example, built through its build() and run
+through the same invariants - then rely on the mandatory render-and-inspect
+step (SKILL.md) as the real acceptance test. Run with:
 
     python3 scripts/test_primitives.py
 """
@@ -43,10 +45,10 @@ def assert_no_raster_images(d):
 
 def assert_signals_have_arrowheads(d):
     """Every dashed instrument-signal line must carry marker-end (Rule 3: complete,
-    directional control loops). sig() emits <path>; the legend's dashed swatch
-    is a <line> and is deliberately not a signal."""
+    directional control loops). The legend's dashed sample line is marked
+    class="swatch" and is the one dashed element that is not a signal."""
     for s in d.o:
-        if s.startswith("<path") and 'stroke-dasharray="7,5.5"' in s:
+        if 'stroke-dasharray="7,5.5"' in s and 'class="swatch"' not in s:
             assert "marker-end" in s, f"signal line missing arrowhead: {s[:80]}"
 
 
@@ -368,7 +370,7 @@ def test_motor():
     assert circles, "motor must draw an ISA 'M' circle"
     cx, cy, r = (float(re.search(k + r'="(-?[\d.]+)"', circles[0]).group(1)) for k in ("cx", "cy", "r"))
     x, y = land
-    assert abs(x - cx) <= r + 0.5 and abs(y - cy) <= r + 0.5, f"landing {land} outside body"
+    assert ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5 <= r + 0.5, f"landing {land} outside the circle"
     assert any(">M<" in s for s in d.o), "motor must carry the letter M"
 
 
