@@ -20,3 +20,11 @@ desktop.ini
 # reference art for building mineral-processing-pfd, never shipped or
 # committed. See docs/adr/0002-ore-dressing-source-assets-not-committed.md.
 /assets/PNG Ore Dressing/
+
+# Local agent tooling (matt-pocock skills install, Claude Code project config
+# and instructions) — per-developer, not part of the shipped skills
+/.claude/
+/.agents/
+/docs/agents/
+/CLAUDE.md
+/skills-lock.json
