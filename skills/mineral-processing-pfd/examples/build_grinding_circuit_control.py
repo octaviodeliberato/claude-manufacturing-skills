@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-"""Primary/secondary crushing stage -> SAG -> ball mill -> hydrocyclone with a
-BASIC-tier control strategy on both circuits (see
-references/control-strategies.md): the regulatory single loops only,
-drive-speed final elements drawn as a motor symbol, the crusher-setting loop
-as a ZIC ending on the crusher body, monitors as indicators, and the
-per-circuit tier note the drawing must carry (ADR 0004: tiers can be mixed
-per circuit, so the note names each one). Crushing loops are 100-series,
-grinding loops 200-series. Run from the examples/ directory;
-test_primitives.py imports build()."""
+"""Primary/secondary crushing stage -> SAG -> ball mill -> hydrocyclone with
+the crushing circuit at the BASIC control tier and the grinding circuit at
+the INTERMEDIATE tier (see references/control-strategies.md). Tiers are
+cumulative (ADR 0004): every basic loop is drawn as at basic - drive-speed
+final elements on a motor symbol, the crusher-setting loop as a ZIC ending
+on the crusher body, monitors as indicators - and the intermediate additions
+sit on top: the load -> feed cascade with a power override selector, the
+water-to-ore ratio station, the PSM -> density cascade, the density ->
+dilution-water cascade with a level limiter, and the pump-pressure override.
+Every master lands on its slave's setpoint port on a leg lettered SP;
+ratio/override/limit functions are Y bubbles. The drawing carries the
+per-circuit tier note (tiers can be mixed per circuit, so the note names each
+one). Crushing loops are 100-series, grinding loops 200-series. Run from the
+examples/ directory; test_primitives.py imports build()."""
 import os
 import sys
 
@@ -16,10 +21,10 @@ from pid_lib import PID  # noqa: E402
 
 
 def build():
-    d = PID(1400, 1560, border=True)
-    d.title("CRUSHING + GRINDING CIRCUIT - BASIC CONTROL STRATEGY",
+    d = PID(1520, 1560, border=True)
+    d.title("CRUSHING + GRINDING CIRCUIT - CONTROL STRATEGY",
             "Primary/secondary crushing with closed-circuit screen - SAG - ball mill - hydrocyclone | "
-            "regulatory (basic tier) loops, 100-series crushing / 200-series grinding tags")
+            "crushing: basic tier, grinding: intermediate tier | 100-series crushing / 200-series grinding tags")
 
     # Two elevation bands: the crushing stage (row 1) above, grinding (row 2)
     # below, joined by a transfer corridor that runs under row 1 and over row
@@ -146,10 +151,11 @@ def build():
     # the lead to the feeder pan and the incoming signal are drawn here.
     m_fd = d.motor(160, Y - 70, tag=None, port="top")
     d.lead(160, Y - 57, 160, Y - 40)
-    # feeder -> conveyor tail -> SAG feed trunnion
+    # feeder -> conveyor tail -> SAG feed trunnion. The conveyor tag sits under
+    # the belt, clear of the ratio-station signal that runs below it at Y+75.
     d.pipe(f"M 170,{Y-10} L 170,{Y+40} L 210,{Y+40}", d.SOLIDS, arrow=True)
     d.conveyor(210, Y + 40, 330, Y - 20)
-    d.txt(245, Y + 66, "CV-201", size=10, weight="bold", anchor="middle")
+    d.txt(300, Y + 30, "CV-201", size=10, weight="bold", anchor="middle")
     d.pipe(f"M 330,{Y-20} L 370,{Y-20} L 370,{Y} L 400,{Y}", d.SOLIDS, arrow=True)
 
     # ================================================================== SAG mill
@@ -157,47 +163,56 @@ def build():
 
     # SAG inlet water: header along the bottom, control valve, joins the feed
     # chute at a junction just ahead of the feed trunnion.
-    d.txt(122, Y + 192, "Process water", size=9, fill=d.SUB)
-    d.pipe(f"M 90,{Y+200} L 232,{Y+200}", d.BLUE)
-    d.cvalve(250, Y + 200, "FV-202", fail="FC", actuator="above", tag_dy=45)
-    d.pipe(f"M 268,{Y+200} L 385,{Y+200} L 385,{Y}", d.BLUE)
+    d.txt(122, Y + 207, "Process water", size=9, fill=d.SUB)
+    d.pipe(f"M 90,{Y+215} L 232,{Y+215}", d.BLUE)
+    d.cvalve(250, Y + 215, "FV-202", fail="FC", actuator="above", tag_dy=45)
+    d.pipe(f"M 268,{Y+215} L 385,{Y+215} L 385,{Y}", d.BLUE)
     d.junction(385, Y)
 
     # ============================================= sump, pump, cyclone, ball mill
-    # Both mill discharges enter the sump basin from below (the pit-fed sump
-    # convention the base-metal example uses); dropping the SAG line at x=660
-    # keeps the x=700 corridor free for the LT-205 -> LIC-205 signal, which
-    # would otherwise have to cross it.
-    d.pipe(f"M 620,{Y} L 660,{Y} L 660,{Y+130} L 750,{Y+130} L 750,{Y+84}", d.ORE, arrow=True)
-    d.pump_sump(760, Y + 40, tag=None)
-    d.txt(812, Y + 60, "PU-201", size=10, weight="bold")
-    d.txt(812, Y + 72, "Cyclone feed pump", size=8.5, fill=d.SUB)
+    # The closed circuit (sump -> pump -> cyclone -> ball mill -> sump) is a
+    # ring of process lines. Everything inside it can only be reached by a
+    # signal that crosses the ring once, so the layout puts the instruments
+    # that talk to each other on the same side: the density/dilution-water
+    # chain and the level transmitter INSIDE the ring (on a widened pit whose
+    # rim and right wall face inward), the pump motor, its override selector
+    # and the PSM analyser OUTSIDE. Two signal-over-process crossings remain
+    # (layout-rules.md Sec. 2 allows them): the PSM setpoint leg over the
+    # cyclone feed line and the level controller's output over the riser.
+    # SAG discharge into the pit's left wall; ball mill return into its floor.
+    d.pipe(f"M 620,{Y} L 660,{Y} L 660,{Y+76} L 740,{Y+76}", d.ORE, arrow=True)
+    sump = d.pump_sump(760, Y + 40, tag=None, basin_w=110)
+    rim_y, floor_y = sump["rim"][2], sump["bottom"][2]
+    d.txt(700, Y + 104, "PU-201", size=10, weight="bold", anchor="middle")
+    d.txt(700, Y + 116, "Cyclone feed pump", size=8.5, fill=d.SUB, anchor="middle")
     m_pu = d.motor(760, Y - 5, tag=None, port="top")
     d.lead(760, Y + 8, 760, Y + 24)
     # pump discharge riser to the cyclone feed nozzle
-    cyc = d.cyclone(960, Y - 150, Y - 40, tag="CL-201  Cyclone", r=22)
+    cyc = d.cyclone(1080, Y - 155, Y - 45, tag="CL-201  Cyclone", r=22)
     cfx, cfy = cyc["feed"]
     d.pipe(f"M 786,{Y+40} L 800,{Y+40} L 800,{cfy} L {cfx},{cfy}", d.ORE, arrow=True)
     # cyclone underflow -> ball mill feed trunnion; overflow up and out to flotation
     ux, uy = cyc["underflow"]
-    d.pipe(f"M {ux},{uy} L {ux},{Y} L 1040,{Y}", d.ORE, arrow=True)
+    d.pipe(f"M {ux},{uy} L {ux},{Y} L 1160,{Y}", d.ORE, arrow=True)
     ox, oy = cyc["overflow"]
-    d.pipe(f"M {ox},{oy} L {ox},{Y-210} L 1360,{Y-210}", d.ORE, arrow=True)
-    d.txt(1250, Y - 218, "Cyclone overflow to flotation", size=9, fill=d.SUB, anchor="middle")
-    d.mill_ball(1040, Y - 55, 1260, Y + 55, tag="ML-202  Ball Mill")
-    d.pipe(f"M 1260,{Y} L 1300,{Y} L 1300,{Y+160} L 770,{Y+160} L 770,{Y+84}", d.ORE, arrow=True)
-    d.txt(1030, Y + 178, "Ball mill discharge to cyclone feed sump (closed circuit)",
+    d.pipe(f"M {ox},{oy} L {ox},{Y-215} L 1480,{Y-215}", d.ORE, arrow=True)
+    d.txt(1400, Y - 223, "Cyclone overflow to flotation", size=9, fill=d.SUB, anchor="middle")
+    d.mill_ball(1160, Y - 55, 1380, Y + 55, tag="ML-202  Ball Mill")
+    d.pipe(f"M 1380,{Y} L 1420,{Y} L 1420,{Y+190} L 820,{Y+190} L 820,{floor_y}", d.ORE, arrow=True)
+    d.txt(1120, Y + 208, "Ball mill discharge to cyclone feed sump (closed circuit)",
           size=8.5, fill=d.SUB, anchor="middle")
-    # dilution water into the sump from the right, through the density valve
-    d.txt(1015, Y + 114, "Dilution water", size=9, fill=d.SUB)
-    d.pipe(f"M 1010,{Y+110} L 938,{Y+110}", d.BLUE)
-    d.cvalve(920, Y + 110, "DV-206", fail="FC", actuator="above", tag_dy=30)
-    d.pipe(f"M 902,{Y+110} L 820,{Y+110} L 820,{Y+80} L 780,{Y+80}", d.BLUE, arrow=True)
+    # dilution water into the sump's right wall from inside the ring, through
+    # the flow valve of the density -> dilution-water cascade
+    d.txt(1128, Y + 114, "Dilution water", size=9, fill=d.SUB)
+    d.pipe(f"M 1120,{Y+110} L 938,{Y+110}", d.BLUE)
+    d.cvalve(920, Y + 110, "FV-210", fail="FC", actuator="above", tag_dy=45)
+    d.pipe(f"M 902,{Y+110} L 864,{Y+110} L 864,{Y+80} L 838,{Y+80}", d.BLUE, arrow=True)
 
     # ============================================================ control loops
     # Every loop: measurement -> controller -> final element, arrowhead per leg.
     # Drive-speed loops terminate on a motor(); water loops on a cvalve();
-    # monitors stop at an indicator (no final element).
+    # monitors stop at an indicator (no final element). Intermediate additions
+    # are marked [INT]; every master lands on a leg lettered SP.
 
     # WIC-201 fresh feed rate: weightometer on CV-201 -> feeder VSD (DRIVE SPEED)
     d.bubble(300, Y - 80, "WT", "201", r=16)
@@ -207,80 +222,131 @@ def build():
     d.sig(f"M 280,{Y-150} L {m_fd[0]},{Y-150} L {m_fd[0]},{m_fd[1]}")
 
     # FIC-202 SAG inlet water flow -> FV-202 (VALVE)
-    d.bubble(110, Y + 120, "FT", "202", r=16)
-    d.lead(110, Y + 200, 110, Y + 136)
-    d.bubble(250, Y + 120, "FIC", "202", shared=True, r=20)
-    d.sig(f"M 126,{Y+120} L 230,{Y+120}")
-    d.sig(f"M 250,{Y+140} L 250,{Y+162}")
+    d.bubble(110, Y + 135, "FT", "202", r=16)
+    d.lead(110, Y + 215, 110, Y + 151)
+    d.bubble(250, Y + 135, "FIC", "202", shared=True, r=20)
+    d.sig(f"M 126,{Y+135} L 230,{Y+135}")
+    d.sig(f"M 250,{Y+155} L 250,{Y+177}")
+
+    # [INT] FFY-202 water-to-ore ratio: a second branch off WT-201 into the
+    # ratio station, whose output is the setpoint of FIC-202 (top port, SP).
+    # The branch crosses the SAG feed chute once - the weightometer is on the
+    # belt and the water header is below it, no re-route exists.
+    d.bubble(250, Y + 75, "FFY", "202", shared=True, r=16)
+    d.txt(226, Y + 79, "ratio", size=8.5, fill=d.SUB, anchor="end")
+    d.sig(f"M 316,{Y-80} L 350,{Y-80} L 350,{Y+75} L 266,{Y+75}")
+    d.sig(f"M 250,{Y+91} L 250,{Y+115}")
+    d.txt(258, Y + 107, "SP", size=8.5, fill=d.SUB)
 
     # WIC-203 SAG mill load (load cells) -> feed-rate setpoint of WIC-201, i.e.
-    # the feeder drive through WIC-201 (DRIVE SPEED). One drawn "SP" landing;
-    # the basic tier stops here - override/feedforward are intermediate additions.
+    # the feeder drive through WIC-201 (DRIVE SPEED). [INT] The load master's
+    # output now passes through JY-204, the low selector of the power override,
+    # and the selector output lands on the WIC-201 setpoint port (SP).
     d.bubble(470, Y - 95, "WT", "203", r=16)
     d.lead(470, Y - 55, 470, Y - 79)
     d.bubble(470, Y - 150, "WIC", "203", shared=True, r=20)
     d.sig(f"M 470,{Y-111} L 470,{Y-130}")
-    d.sig(f"M 450,{Y-150} L 320,{Y-150}")
+    d.sig(f"M 450,{Y-150} L 401,{Y-150}")
+    d.bubble(385, Y - 150, "JY", "204", shared=True, r=16)
+    d.txt(385, Y - 118, "low select", size=8.5, fill=d.SUB, anchor="middle")
+    d.sig(f"M 369,{Y-150} L 320,{Y-150}")
     d.txt(335, Y - 158, "SP", size=8.5, fill=d.SUB)
 
-    # JI-204 SAG mill power: monitor only (indication / high alarm), no final element
+    # JIC-204 SAG mill power: the basic-tier JI monitor becomes the high-limit
+    # controller [INT] - same transmitter, same place - and its output enters
+    # the JY-204 low selector from above (power override on feed).
     d.bubble(560, Y - 95, "JT", "204", r=16)
     d.lead(560, Y - 55, 560, Y - 79)
-    d.bubble(560, Y - 150, "JI", "204", shared=True, r=20)
+    d.bubble(560, Y - 150, "JIC", "204", shared=True, r=20)
     d.sig(f"M 560,{Y-111} L 560,{Y-130}")
+    d.sig(f"M 560,{Y-170} L 560,{Y-200} L 385,{Y-200} L 385,{Y-166}")
+    d.txt(472, Y - 206, "power override", size=8.5, fill=d.SUB, anchor="middle")
 
     # LIC-205 sump level -> cyclone feed pump VSD (DRIVE SPEED). Pairing chosen
     # for this drawing: level on the pump, density on the dilution water - the
     # two cannot both sit on the water valve (control-strategies.md caveat).
-    d.bubble(700, Y + 76, "LT", "205", r=16)
-    d.lead(738, Y + 76, 716, Y + 76)
-    d.bubble(700, Y - 60, "LIC", "205", shared=True, r=20)
-    d.sig(f"M 700,{Y+60} L 700,{Y-40}")
-    d.sig(f"M 720,{Y-60} L {m_pu[0]},{Y-60} L {m_pu[0]},{m_pu[1]}")
+    # LT on a lead up from the pit rim, inside the ring; the controller output
+    # crosses the riser once to reach the PY-207 selector above the motor.
+    d.bubble(835, Y + 30, "LT", "205", r=16)
+    d.lead(835, rim_y, 835, Y + 46)
+    d.bubble(835, Y - 60, "LIC", "205", shared=True, r=20)
+    d.sig(f"M 835,{Y+14} L 835,{Y-40}")
+    d.sig(f"M 815,{Y-60} L 776,{Y-60}")
 
-    # DIC-206 cyclone feed density -> DV-206 dilution water (VALVE). D = density
-    # is the user's-choice letter and is declared on the legend below.
-    d.bubble(840, Y - 40, "DT", "206", r=16)
-    d.lead(800, Y - 40, 824, Y - 40)
-    d.bubble(900, Y - 40, "DIC", "206", shared=True, r=20)
-    d.sig(f"M 856,{Y-40} L 880,{Y-40}")
-    d.sig(f"M 900,{Y-20} L 900,{Y+40} L 920,{Y+40} L 920,{Y+72}")
+    # [INT] PY-207 pump-pressure override: the basic-tier PI-207 monitor becomes
+    # PIC-207, the constraint controller, whose output enters the PY selector
+    # from above; the selector (level normally, pressure when out of band)
+    # drives the pump motor.
+    d.bubble(760, Y - 60, "PY", "207", shared=True, r=16)
+    d.txt(738, Y - 57, "override", size=8.5, fill=d.SUB, anchor="end")
+    d.sig(f"M 760,{Y-44} L {m_pu[0]},{m_pu[1]}")
+    d.bubble(850, Y - 185, "PT", "207", r=16)
+    d.lead(850, cfy, 850, Y - 169)
+    d.bubble(850, Y - 245, "PIC", "207", shared=True, r=20)
+    d.sig(f"M 850,{Y-201} L 850,{Y-225}")
+    d.sig(f"M 830,{Y-245} L 760,{Y-245} L 760,{Y-76}")
 
-    # PI-207 cyclone feed pressure: monitor only at the basic tier (becomes the
-    # pump-speed override at intermediate)
-    d.bubble(870, Y - 180, "PT", "207", r=16)
-    d.lead(870, cfy, 870, Y - 164)
-    d.bubble(870, Y - 240, "PI", "207", shared=True, r=20)
-    d.sig(f"M 870,{Y-196} L 870,{Y-220}")
+    # DIC-206 cyclone feed density (DT on a lead from the riser, inside the
+    # ring). D = density is the user's-choice letter and is declared on the
+    # legend below. [INT] Its setpoint comes from the PSM cascade (right port,
+    # SP) and its output no longer drives the valve directly: it passes through
+    # the LY-205 level limiter to the dilution-water FIC-210 slave.
+    d.bubble(835, Y - 115, "DT", "206", r=16)
+    d.lead(800, Y - 115, 819, Y - 115)
+    d.bubble(920, Y - 115, "DIC", "206", shared=True, r=20)
+    d.sig(f"M 851,{Y-115} L 900,{Y-115}")
+    d.sig(f"M 920,{Y-95} L 920,{Y-61}")
 
-    # AI-208 particle size monitor (PSM) on the cyclone overflow: monitor only
-    d.bubble(1080, Y - 250, "AT", "208", r=16)
-    d.lead(1080, Y - 210, 1080, Y - 234)
-    d.bubble(1140, Y - 250, "AI", "208", shared=True, r=20)
-    d.sig(f"M 1096,{Y-250} L 1120,{Y-250}")
-    d.txt(1110, Y - 280, "PSM", size=9, fill=d.SUB, anchor="middle")
+    # [INT] LY-205 level limiter on the density -> dilution-water setpoint:
+    # a second branch off LT-205 into the limiter's side port.
+    d.bubble(920, Y - 45, "LY", "205", shared=True, r=16)
+    d.txt(940, Y - 41, "level limit", size=8.5, fill=d.SUB)
+    d.sig(f"M 851,{Y+30} L 884,{Y+30} L 884,{Y-45} L 904,{Y-45}")
+    d.sig(f"M 920,{Y-29} L 920,{Y-5}")
+    d.txt(926, Y - 12, "SP", size=8.5, fill=d.SUB)
+
+    # [INT] FIC-210 dilution water flow, the cascade slave -> FV-210 (VALVE)
+    d.bubble(920, Y + 15, "FIC", "210", shared=True, r=20)
+    d.bubble(990, Y + 15, "FT", "210", r=16)
+    d.lead(990, Y + 110, 990, Y + 31)
+    d.sig(f"M 974,{Y+15} L 940,{Y+15}")
+    d.sig(f"M 920,{Y+35} L 920,{Y+72}")
+
+    # AIC-208 particle size (PSM) on the cyclone overflow: [INT] the basic-tier
+    # AI monitor becomes the cascade master; its output lands on the DIC-206
+    # setpoint port, crossing the cyclone feed line once on the way in.
+    d.bubble(1210, Y - 255, "AT", "208", r=16)
+    d.lead(1210, Y - 215, 1210, Y - 239)
+    d.bubble(1150, Y - 255, "AIC", "208", shared=True, r=20)
+    d.sig(f"M 1194,{Y-255} L 1170,{Y-255}")
+    d.txt(1180, Y - 285, "PSM", size=9, fill=d.SUB, anchor="middle")
+    d.sig(f"M 1130,{Y-255} L 965,{Y-255} L 965,{Y-115} L 940,{Y-115}")
+    d.txt(971, Y - 127, "SP", size=8.5, fill=d.SUB)
 
     # JI-209 ball mill power: monitor only
-    d.bubble(1150, Y - 95, "JT", "209", r=16)
-    d.lead(1150, Y - 55, 1150, Y - 79)
-    d.bubble(1150, Y - 150, "JI", "209", shared=True, r=20)
-    d.sig(f"M 1150,{Y-111} L 1150,{Y-130}")
+    d.bubble(1270, Y - 95, "JT", "209", r=16)
+    d.lead(1270, Y - 55, 1270, Y - 79)
+    d.bubble(1270, Y - 150, "JI", "209", shared=True, r=20)
+    d.sig(f"M 1270,{Y-111} L 1270,{Y-130}")
 
     # ============================================================ sheet furniture
     # Per-circuit tier note (ADR 0004): the only place that says which control
     # tier the drawn loops represent.
     Y_NOTES = Y + 300
     d.notes(60, Y_NOTES, "CONTROL STRATEGY", [
-        "Crushing: basic (assumed) | Grinding: basic (assumed) - no tier was named; intermediate/advanced add cascades, ratio, override, supervisory",
+        "Crushing: basic (assumed) | Grinding: intermediate - intermediate was named for grinding only; tiers are cumulative",
         "ZIC-103 holds CSS in setting mode; load mode (PT/JT -> ZIC) is the alternative mode of the same controller, not a second loop",
         "Sump level -> pump speed and cyclone feed density -> dilution water: chosen pairing, they cannot share the water valve",
-        "WI-105 (belt scale), JI-204 / JI-209 (mill power), PI-207 (cyclone feed pressure), AI-208 (PSM) are monitors - no final element",
-        "Feeder and pump speed loops terminate on the drive (M), not a valve; WIC-203 writes the setpoint of WIC-201",
+        "Cascades: WIC-203 -> JY-204 -> WIC-201 SP (JIC-204 power override); FFY-202 -> FIC-202 SP (water-to-ore ratio);",
+        "AIC-208 -> DIC-206 SP (PSM); DIC-206 -> LY-205 -> FIC-210 SP (level limit); LIC-205 / PIC-207 -> PY-207 -> pump (pressure override)",
+        "Not drawn - no source on this sheet: feedforward from pebbles / ore size / speed, ball addition ratio, downstream density cascade",
+        "WI-105 (belt scale) and JI-209 (ball mill power) are monitors - no final element; speed loops terminate on the drive (M), not a valve",
     ])
-    d.notes(800, Y_NOTES, "DESIGN BASIS / ASSUMPTIONS", [
+    d.notes(900, Y_NOTES, "DESIGN BASIS / ASSUMPTIONS", [
         "Conceptual only: no setpoints, tuning, controller or transmitter sizing, interlocks or alarms",
         "Gyratory primary, cone secondary in forward closed circuit with a 2-deck dry screen; feeders on VSDs",
         "Single SAG - ball mill line, fixed-speed mills, sump pump on VSD; loop tags 1xx crushing, 2xx grinding",
+        "Signal legs cross a process line twice inside the closed circuit and once at the SAG chute (no re-route exists)",
         "Not for construction - no equipment sizing, mass balance, or hazard review",
     ])
     d.legend([
@@ -288,8 +354,8 @@ def build():
         ("Ore slurry / pulp", d.ORE, False),
         ("Process / dilution water", d.BLUE, False),
         ("DCS signal", d.SIG, True),
-    ], y=Y_NOTES + 130, x=60, density=True)
-    d.revision("Rev B | mineral-processing-pfd example", y=Y_NOTES + 154)
+    ], y=Y_NOTES + 166, x=60, density=True)
+    d.revision("Rev C | mineral-processing-pfd example", y=Y_NOTES + 190)
     return d
 
 

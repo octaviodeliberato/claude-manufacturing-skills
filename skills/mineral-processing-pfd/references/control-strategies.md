@@ -16,7 +16,7 @@ reach through a search snippet are marked *(snippet)* there and are not relied o
 | Tier | What it is | Drawn as |
 |---|---|---|
 | **basic** | Regulatory layer: single-loop PID on the primary process variables. The default when the user names no tier — assume it and say so. | Ordinary ISA-5.1 loops: transmitter → controller `bubble` → final element |
-| **intermediate** | Enhanced regulatory: cascade, ratio, feedforward and override/constraint loops *added on top of* the basic loops. | Masters landing on the setpoint side of the slave controllers (`pfd-generator` cascade convention) |
+| **intermediate** | Enhanced regulatory: cascade, ratio, feedforward and override/constraint loops *added on top of* the basic loops. | Masters landing on the setpoint port of the slave controllers; ratio/override/feedforward functions as `Y` bubbles — see "Drawing a cascade, ratio or override" below |
 | **advanced** | Supervisory/optimising layer (expert system or MPC) that writes setpoints down to the intermediate layer. Never drawn unless asked. | One `supervisory_block` per circuit + `softlink` signals to the controllers it drives *(primitives not yet shipped — later ticket)* |
 
 Tiers are **cumulative**: a higher tier never removes or replaces a lower-tier loop, so each tier's
@@ -36,9 +36,38 @@ table lists only what that tier *adds*.
 A analysis · F flow · J power · L level · P pressure · S speed · W weight/force · Z position; succeeding
 C control · I indicate · T transmit · V valve · Y compute/relay. **D is "user's choice"** in Table 4.1 —
 density is the conventional assignment, so any drawing with a `DT`/`DIC` must carry the legend
-declaration (`legend(..., density=True)`). `SC`/`SIC` is formed by the ordinary rules. The retrieved
-pages of ISA-5.1 do not include the cascade-drawing clause, so master/slave drawing follows the
-existing `pfd-generator` convention (master signal lands on the slave controller, marked "SP").
+declaration (`legend(..., density=True)`). `SC`/`SIC` is formed by the ordinary rules. Modifier
+**F** in the second position = ratio, so a ratio station is `FFY` (computing) or `FFC` (controlling).
+The retrieved pages of ISA-5.1 do not include the cascade-drawing clause, so master/slave drawing
+follows the existing `pfd-generator` convention — see the next section.
+
+### Drawing a cascade, ratio or override (intermediate tier)
+
+The ISA-5.1 clause on drawing cascade loops could not be sourced (research §1: the retrieved pages
+are Tables 4.1 and 5.1.1–5.4.4 only), so this skill follows the convention `pfd-generator` already
+uses in its distillation example (`references/isa-conventions.md` §5 there) and that the shipped
+grinding example applies:
+
+- **A master's output lands on the slave's setpoint port.** The slave controller bubble has three
+  connections — measurement in, setpoint in, output out — on three *different* ports (bottom /
+  side / top or the other side), so the setpoint leg can never be mistaken for the measurement.
+  Label the leg `SP` beside the arrowhead (`pfd-generator` writes "CASCADE SP" / "remote SP"; the short
+  form is the same convention, chosen because comminution sheets carry several cascades in little room). The slave's own output still lands on the final element
+  exactly as it did at the basic tier: a cascade adds a bubble and a leg, it never re-routes the
+  regulatory loop.
+- **Ratio, override and feedforward are `Y` bubbles, never implied by a line.** A ratio station is
+  `FFY` (input: the wild-flow transmitter; output: the slave's setpoint), an override/constraint
+  selector is `JY`/`PY`/`LY` (inputs: the constraint controller's output and the normal master's
+  output; output: the slave's setpoint), a feedforward computer is `WY`/`AY`. Write the function
+  beside the bubble in small text ("low select", "ratio", "feedforward") — the letters alone do
+  not say which. The constraint's own controller (`JIC`, `PIC`) is an ordinary bubble upstream of
+  the selector; if the basic tier drew that variable as a monitor (`JI`, `PI`), the transmitter
+  stays and the indicator becomes an indicating controller — nothing is removed (ADR 0004).
+- **Signal crossings.** A setpoint leg may cross a *process* line where no small re-route exists
+  (`layout-rules.md` §2 — acceptable practice, no jump), and it commonly must: a closed grinding
+  circuit is a ring of process lines (sump → pump → cyclone → mill → sump) and the density and
+  dilution-water instruments sit inside it while the particle-size analyser sits outside. Signal
+  legs may never cross *each other* — re-route, and never drop a loop to avoid a crossing.
 
 ### Loop tag numbering
 
@@ -91,9 +120,26 @@ The same convention serves the SAG pebble crusher (Circuit 2) and any tertiary c
 signal ends on equipment rather than on a `cvalve` or `motor`, this is the one final-element class a
 reader cannot identify from the symbol it lands on; the "CSS" label and the narrative row carry that.
 
-### Intermediate tier — additions only
+### Intermediate tier — additions only (research §2.2)
 
-*Not yet written.*
+| Loop | Tag scheme | Measured variable (ISA letters) | Controller / function | Manipulated variable → final element (class) | Objective | Master / slave | Drawing hint | Source |
+|---|---|---|---|---|---|---|---|---|
+| Power/pressure override on the CSS controller | `JT/JIC-1x3` (power) or `PT/PIC-1x3` (hydroset pressure) → `JY`/`PY-1x3` | Cone crusher motor power (`JT`) or hydroset pressure (`PT`) against its limit | `JIC`/`PIC` (constraint controller) → `JY`/`PY` low selector | Setpoint of the basic `ZIC-1x3` → crusher body (**CRUSHER SETTING**) | Protect the crusher: open the CSS when power or pressure runs high | **Master** = `JIC`/`PIC` via the selector; **slave** = `ZIC-1x3` | `JT` on a lead from the crusher body (motor end), `JIC` above it, `JY` beside the `ZIC` on its setpoint side; `JY` output lands on the `ZIC` setpoint port marked `SP`; the `ZIC` output still ends on the crusher body at the hydroset end | §2.2 [ASRi (snippet); MetsoCSH pp.66–67] |
+| Wear compensation of CSS | `ZY-1x3` | Calibrated mainshaft-position drift (no transmitter of its own — a periodic calibration in the crusher controller) | `ZY` computing function | Setpoint (CSS reference) of `ZIC-1x3` (**CRUSHER SETTING**) | Hold the true CSS as liners wear; HP-type crushers re-calibrate "after a specific period of time or when the power draw drops below a certain limit" | **Master** = `ZY`; **slave** = `ZIC-1x3` | One `ZY` bubble next to the `ZIC`, output into the same setpoint port (or into the `JY` selector when the override is also drawn, so the `ZIC` keeps one setpoint leg); label "wear comp."; say in the narrative that it is a controller-internal function (ASRi, IC70C), not a field loop | §2.2 [ASRi (snippet); Hulthen2010 p.23] |
+| Level-to-feeder cascade with power constraint | `LIC-1x2` → `JY-1x2` → `SC-1x2` | Cavity level (`LT-1x2`, primary); crusher current/power (`IT`/`JT`, constraint); feeder speed feedback (`ST`) | `LIC` master, `SC` slave, `JIC`/`IIC` → `JY` low selector | Feeder speed setpoint → feeder `motor` (**DRIVE SPEED**) | Choke feed held by level while the crusher's power limit caps the feeder | **Master** = `LIC-1x2` (through `JY`); **slave** = `SC-1x2` | Adds a speed controller `SC` beside the feeder `motor` (its `ST` feedback is a short lead from the motor); the basic `LIC` output now lands on the `SC` setpoint port through the `JY`, marked `SP`; the `SC` output lands on the `motor`. Formalises the basic loop — draw it only once | §2.2 [MetsoCSH p.162] |
+| Feed-rate feedforward from belt scale | `WT-1x5` (or an upstream belt scale) → `WY-1x5` | Belt-scale tonnage upstream of the feeder (`WT`) | `WY` feedforward computer | Trim on the feeder speed setpoint → feeder `motor` (**DRIVE SPEED**) | Anticipate load changes before the level or power moves | **Feedforward into the slave** `SC-1x2` (no setpoint of its own) | `WY` bubble beside the `SC`; a second branch off the `WT` signal into `WY`; `WY` output into the `JY` selector (or summed at the `SC` setpoint) on a leg labelled "FF" — a feedforward trim, never a second controller and never a second `SP` leg. Research §2.2 writes the computer as `FY`; `WY` is used here because its input is the weight transmitter (ISA first letter follows the measured variable) | §2.2 [MetsoCSH p.162] |
+| Eccentric-speed selection *(only if a VSD is fitted)* | `WT-1x5` → `SIC-1x6` | Belt-scale product yield (`WT`) and crusher speed (`ST`) | `SIC` | Crusher eccentric speed via frequency converter → crusher drive `motor` (**DRIVE SPEED**) | Pick the eccentric speed that maximises yield at the current CSS | — (standalone at this tier; the advanced optimiser writes its setpoint) | `motor` on the crusher body at the drive end, `SIC` beside it; belt-scale branch into the `SIC`. Omit on a fixed-speed crusher and say so | §2.2 [Hulthen2010 p.6, abstract] |
+
+Caveats for the crushing intermediate tier:
+
+- **One setpoint leg per slave.** If both the override and the wear compensation are drawn, chain
+  them (`ZY` → `JY` → `ZIC`) so the `ZIC` has one setpoint port in use; two masters writing the same
+  setpoint is a drawing defect a reviewer will call out.
+- **The cascade formalises the basic level loop, it does not add a second feeder loop.** The basic
+  `LIC` → `motor` leg becomes `LIC` → `JY` → `SC` → `motor`; the `LT`, `LIC` and `motor` are the
+  same bubbles as at basic.
+- **No pebble/size/speed feedforward at crushing** — the only feedforward source in the research is
+  the belt scale.
 
 ### Advanced tier — supervisory block
 
@@ -124,17 +170,27 @@ Caveats for the SAG basic tier:
 - **Power is a monitor at the basic tier.** The high-limit *override* on feed is an intermediate
   addition — do not draw a `JIC` writing to the feed loop at basic.
 
-### Intermediate tier — additions only
+### Intermediate tier — additions only (research §3.2)
 
-*Not yet written — later ticket (load → feed cascade formalised, water-to-ore ratio `FFC`,
-power/bearing-pressure override on feed, feedforward from pebbles/size/speed, ball addition ratio).
-Note when writing it: the basic row above already lands the load controller on the feed `WIC`
-setpoint, so the cascade row should say what it adds (override, feedforward), not redraw the landing.*
+| Loop | Tag scheme | Measured variable (ISA letters) | Controller / function | Manipulated variable → final element (class) | Objective | Master / slave | Drawing hint | Source |
+|---|---|---|---|---|---|---|---|---|
+| Load → feed-rate cascade | `WIC-2x3` (or `PIC-2x3`) → `WIC-2x1` | Mill load (`WT` load cells / `PT` bearing pressure) | `WIC`/`PIC` master, `WIC-2x1` slave | Setpoint of the fresh-feed `WIC-2x1` → feeder `motor` (**DRIVE SPEED**) | The master "takes the load measurement and set point ... and sets the set point for the feed rate controller" | **Master** = load `WIC-2x3`; **slave** = feed `WIC-2x1` | The basic row already lands the load controller on the feed `WIC` setpoint port marked `SP` — this tier adds nothing to that leg except the override selector (next row) spliced into it. Do not redraw the landing | §3.2 [Forbes&Gough p.7] |
+| Water-to-ore ratio | `WT-2x1` → `FFY-2x2` → `FIC-2x2` | Fresh-feed tonnage (`WT-2x1`, the wild flow) and inlet water flow (`FT-2x2`) | `FFY` ratio station | Setpoint of the inlet-water `FIC-2x2` → water valve (**VALVE**) | Mill inlet water "kept at a constant ratio" of ore feed — constant discharge density | **Master** = `FFY-2x2` (ratio); **slave** = `FIC-2x2` | `FFY` directly above the `FIC` so its output drops onto the `FIC` setpoint port (top) marked `SP`; the `WT-2x1` gets a second branch off its bubble into the `FFY`. That branch usually has to cross the feed conveyor or chute — acceptable (see the cascade section), no re-route exists because the weightometer is on the belt and the water header is below it | §3.2 [LeRoux2019 p.14, pp.37–38] |
+| Power / bearing-pressure override on feed | `JT-2x4` → `JIC-2x4` → `JY-2x4` (or `PT/PIC/PY`) | Mill power (`JT-2x4`) or bearing pressure (`PT`) against its high limit | `JIC` high-limit controller → `JY` low selector | Setpoint of the fresh-feed `WIC-2x1` (**DRIVE SPEED**) | Cut feed "should a high limit be violated ... until mill operations return to acceptable limits" | **Override master** = `JIC-2x4` via `JY`; **slave** = `WIC-2x1` (the `JY` also takes the load master's output) | The basic `JI-2x4` monitor becomes `JIC-2x4` (same `JT`, same place); the `JY` sits on the `SP` leg between `WIC-2x3` and `WIC-2x1`, `JIC` output comes down into the `JY` from above; label "low select". Research §3.2 writes "high selector"; a feed *cut* means the selector passes the lower of the two feed-rate demands, so low select is the correct function for this sign convention — the source's word is not carried over | §3.2 [Forbes&Gough p.6] |
+| Feedforward into load control | `WT` (pebble recycle) / `AT` (ore size) / `ST` (mill speed) → `WY-2x3` | Whichever of pebble recycle tonnage, feed coarse fraction, mill speed is measured on the flowsheet | `WY` feedforward computer | Trim on the load master's setpoint / output → feed `WIC-2x1` (**DRIVE SPEED**) | Reject measured disturbances before the load moves | **Feedforward into the master** `WIC-2x3` | `WY` beside `WIC-2x3` on its setpoint side, one leg per measured disturbance into the `WY`, `WY` output onto the `WIC-2x3` labelled "FF". Draw only for sources that exist on the drawing (a pebble-return belt scale, an ore-size analyser, a VSD `ST`); with none present, omit the row and say so | §3.2 [Forbes&Gough p.7, Fig. 2] |
+| Ball addition ratio *(only if a ball charging system is on the flowsheet)* | `WT-2x1` → `FFC-2xN` | Fresh-feed tonnage (`WT-2x1`) | `FFC` ratio controller | Ball feeder speed → ball feeder `motor` (**DRIVE SPEED**) | Ball addition "set as constant fraction" of ore feed to hold ball filling | **Ratio master** = `FFC`; slave = the ball feeder drive | Ball feeder + `motor` beside the SAG feed chute, `FFC` above it with a branch off `WT-2x1`. Omit when no ball charging equipment is drawn and say so | §3.2 [LeRoux2019 p.37] |
+
+Caveats for the SAG intermediate tier:
+
+- **The `WIC-2x1` still has one setpoint leg.** Load master and power override meet in the `JY`;
+  only the `JY` output lands on the feed controller.
+- **Feedforward and ball-addition rows are conditional** on equipment/measurements that exist on the
+  drawing — the narrative says which were omitted and why, rather than inventing a transmitter.
 
 ### Advanced tier — supervisory block
 
 *Not yet written — one `supervisory_block` ("SAG MILL OPTIMISER (MPC)") with `softlink` to the feed
-`WIC`, speed `SIC` and water-ratio `FFC`.*
+`WIC`, speed `SIC` and water-ratio `FFY`.*
 
 ---
 
@@ -166,15 +222,36 @@ Caveats for the ball-mill/cyclone basic tier:
 - **Monitors are indication only.** Mill power (`JI`), particle size (`AI`) and, in the pairing above,
   cyclone feed pressure (`PI`) have no final element; the narrative says "monitor" for each.
 
-### Intermediate tier — additions only
+### Intermediate tier — additions only (research §4.2)
 
-*Not yet written — later ticket (PSM → pump-speed/density cascade, density → dilution cascade with
-level constraint, downstream density cascade, water-to-ore ratio, pump-pressure override).*
+| Loop | Tag scheme | Measured variable (ISA letters) | Controller / function | Manipulated variable → final element (class) | Objective | Master / slave | Drawing hint | Source |
+|---|---|---|---|---|---|---|---|---|
+| Particle size → cyclone feed cascade | `AT-2x8` → `AIC-2x8` → `DIC-2x6` (density) **or** → `PIC-2x7`/`SIC` (pump speed) | Cyclone overflow particle size, on-line PSM (`AT-2x8`) | `AIC` master | Setpoint of the density `DIC-2x6` → dilution water (**VALVE**), when the pump is level-owned; setpoint of the pump-speed/pressure controller → pump `motor` (**DRIVE SPEED**) when the pump is free | Hold the cyclone cut size ("analyser controller (AC) for PSE manipulates CFF") | **Master** = `AIC-2x8`; **slave** = `DIC-2x6` or `PIC-2x7`/`SIC` — one, not both | The basic `AI-2x8` monitor becomes `AIC-2x8` beside the `AT` on the overflow; its output lands on the slave's setpoint port marked `SP`. With the shipped pairing (level → pump) the slave is the `DIC`, which sits inside the closed-circuit ring, so this leg crosses the cyclone feed line once — acceptable, see the cascade section | §4.2 [LeRoux2019 p.38] |
+| Density → dilution-water cascade with level constraint | `DIC-2x6` → `LY-2x5` → `FIC-2xN` / `FT-2xN` / `FV-2xN` | Cyclone feed density (`DT-2x6`, primary); dilution water flow (`FT`, slave); sump level (`LT-2x5`, constraint) | `DIC` master, `LY` limiter, `FIC` slave | Setpoint of the dilution-water `FIC` → `FV` (**VALVE**) | Stabilise cyclone feed density and sump level together while the pump holds level | **Master** = `DIC-2x6`; **slave** = `FIC-2xN`; **constraint** = `LT-2x5` into `LY-2x5` | Column `DIC` → `LY` → `FIC` → `FV`: the basic `DIC` → valve leg gains the `FIC` slave (valve retagged `FV`, `FT` on a lead from the water line) and the `LY` on the `SP` leg; the `LT-2x5` gets a second branch into the `LY` side port; label "level limit". Nothing basic is removed — the `LIC` → pump loop is untouched | §4.2 [Mintek p.3] |
+| Downstream density → CFD setpoint cascade *(only if the flotation feed is on the flowsheet)* | rougher-feed `DT/DIC` → `DIC-2x6` | Rougher (flotation) feed density | Downstream `DIC` master | Setpoint of the cyclone-feed `DIC-2x6` (**VALVE** through the slave chain) | Change the cyclone feed density setpoint to hold flotation feed density | **Master** = flotation-feed `DIC`; **slave** = `DIC-2x6` | Only one master may write the `DIC-2x6` setpoint: if the PSM cascade is drawn, this one is a note in the narrative, not a second `SP` leg. Omit entirely when the drawing ends at the cyclone overflow | §4.2 [Mintek p.4] |
+| Water-to-ore ratio at mill inlet *(only if the ball mill has its own feed and water loops)* | `WT` → `FFY` → `FIC` | Ball-mill feed tonnage and inlet water flow | `FFY` ratio station | Setpoint of the mill-water `FIC` → valve (**VALVE**) | Constant mill discharge density | **Master** = `FFY`; **slave** = `FIC` | As for the SAG ratio row. In a SAG-fed ball mill with no separate water loop, omit and say so | §4.2 [LeRoux2019 p.14] |
+| Pump-pressure override | `PT-2x7` → `PIC-2x7` → `PY-2x7` | Cyclone inlet pressure (`PT-2x7`) against its low/high band | `PIC` constraint controller → `PY` selector | Pump speed → pump `motor` (**DRIVE SPEED**) (or dilution water when the pump is density-owned) | Keep the cyclones out of roping/choking: pressure inside its band overrides level | **Override master** = `PIC-2x7` via `PY`; **slave** = the pump drive (the `PY` also takes the `LIC-2x5` output) | The basic `PI-2x7` monitor becomes `PIC-2x7` (same `PT`); the `PY` sits on the `LIC` → `motor` leg just above the pump motor, `PIC` output comes into it from above; label "override" | §4.2 [Mintek (snippet)] |
+
+Caveats for the ball-mill/cyclone intermediate tier:
+
+- **The pairing chosen at basic decides the slaves.** With level → pump and density → water (the
+  shipped example) the PSM cascade lands on the `DIC`, the pressure override on the pump. With the
+  other pairing (level → water, density → pump) swap them. Never re-pair at a higher tier — tiers
+  are cumulative.
+- **One master per setpoint.** PSM cascade and downstream-density cascade both target the
+  `DIC-2x6` setpoint — draw one, mention the other.
+- **The ring crossing is expected.** The `DIC`, `LY`, `FIC` and dilution valve sit inside the
+  closed-circuit ring (sump → pump → cyclone → mill → sump); the `AT`/`AIC` on the overflow and the
+  `LIC` → pump loop sit outside it. Expect one signal-over-process crossing for the PSM `SP` leg
+  and one for the level loop, place the crossings on straight pipe runs away from arrowheads and
+  junctions, and never let two signals cross each other. `pump_sump(basin_w=...)` widens the pit so
+  the level transmitter's rim lead and the dilution-water inlet both sit on the ring's inside, which
+  is what keeps the count at two.
 
 ### Advanced tier — supervisory block
 
 *Not yet written — one `supervisory_block` ("GRINDING CIRCUIT OPTIMISER (MPC)") with `softlink` to
-the feed `WIC`, water `FFC`/`FIC`, sump `LIC`, density `DIC` and pump `SIC`/`PIC`.*
+the feed `WIC`, water `FFY`/`FIC`, sump `LIC`, density `DIC` and pump `SIC`/`PIC`.*
 
 ---
 
@@ -198,6 +275,10 @@ d.notes(x, y, "CONTROL STRATEGY", [
     ...
 ])
 ```
+
+The shipped example (`examples/build_grinding_circuit_control.py`) is the mixed case — the user
+named intermediate for grinding only — and its note reads
+`"Crushing: basic (assumed) | Grinding: intermediate"`.
 
 The separator is ASCII on purpose: `pid_lib.save()` writes in the platform encoding, so a non-ASCII
 `·` breaks the SVG on a managed Windows Python. This is the only place on the sheet that says what
