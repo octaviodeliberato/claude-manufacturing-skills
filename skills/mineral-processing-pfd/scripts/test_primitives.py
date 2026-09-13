@@ -289,6 +289,21 @@ def test_pump_sump():
     standard_checks(d)
 
 
+def test_pump_sump_basin_w():
+    """A sump that takes several inflows and carries a level transmitter on its
+    rim needs a pit wider than the pump; basin_w widens it to the right of the
+    pump and the returned rim span must say so. Default keeps the old width."""
+    d = PID()
+    rim = d.pump_sump(200, 200, basin_w=160)["rim"]
+    standard_checks(d)
+    x0, x1, y = rim
+    assert x1 - x0 == 160, f"rim span {x1 - x0} != basin_w"
+    assert x0 < 200 - 16 and x1 > 200 + 16, f"pump not seated over the rim: {rim}"
+    assert y > 200 + 16, "rim must sit below the pump circle"
+    default = PID().pump_sump(200, 200)["rim"]
+    assert default[1] - default[0] == 2 * 16 + 16, f"default rim changed: {default}"
+
+
 def test_feeder_apron():
     d = PID()
     d.feeder_apron(100, 150, 320, 200, tag="FD-101")
@@ -346,6 +361,7 @@ DEWATERING_TRANSPORT_TESTS = [
     ("filter_drum", test_filter_drum),
     ("pump_centrifugal", test_pump_centrifugal),
     ("pump_sump", test_pump_sump),
+    ("pump_sump basin_w", test_pump_sump_basin_w),
     ("feeder_apron", test_feeder_apron),
     ("conveyor", test_conveyor),
     ("ore_bin", test_ore_bin),
@@ -397,19 +413,30 @@ def _load_example(name):
 
 
 def test_example_grinding_circuit_control():
-    """Drawing-level: the shipped basic-tier crushing + grinding example builds
-    end to end, passes every structural invariant, carries the per-circuit
-    tier note naming BOTH circuits (ADR 0004: tiers can be mixed per circuit,
-    so the note must list each one), draws the crusher-setting loop as a ZIC
-    and declares D on the legend because it draws a density loop."""
+    """Drawing-level: the shipped example (crushing at basic, grinding at
+    intermediate) builds end to end, passes every structural invariant, carries
+    the per-circuit tier note naming BOTH circuits (ADR 0004: tiers can be mixed
+    per circuit, so the note must list each one), draws the crusher-setting
+    loop as a ZIC, declares D on the legend because it draws a density loop,
+    and draws the intermediate additions as the reference prescribes: a ratio
+    station and override/limit selectors as Y bubbles, the PSM as a controller
+    (AIC) rather than the basic-tier indicator, every master landing on a leg
+    lettered SP."""
     d = _load_example("build_grinding_circuit_control").build()
     standard_checks(d)
     text = "\n".join(d.o)
-    assert "Crushing: basic (assumed) | Grinding: basic (assumed)" in text, \
+    assert "Crushing: basic (assumed) | Grinding: intermediate" in text, \
         "per-circuit tier note must list every circuit in the documented format"
     assert ">ZIC<" in text, "crusher-setting (CSS) loop must be a ZIC controller"
     assert "D = density" in text, "density loop drawn but D not declared on the legend"
     assert any('class="motor"' in s for s in d.o), "drive-speed loops need a motor final element"
+    # intermediate tier, cumulative on top of basic (control-strategies.md)
+    for letters, role in (("FFY", "water-to-ore ratio station"), ("JY", "power override selector"),
+                          ("PY", "pump-pressure override selector"), ("LY", "sump-level limiter"),
+                          ("AIC", "PSM cascade master"), ("FIC", "dilution-water cascade slave")):
+        assert f">{letters}<" in text, f"intermediate grinding tier must draw the {role} ({letters})"
+    assert ">AI<" not in text, "the basic-tier PSM indicator must become the AIC, not sit beside it"
+    assert text.count(">SP<") >= 4, "each cascade master must land on a leg lettered SP"
 
 
 CONTROL_TESTS = [

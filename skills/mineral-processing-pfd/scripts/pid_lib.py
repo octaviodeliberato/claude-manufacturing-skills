@@ -590,15 +590,23 @@ class PID:
         if tag:
             self.txt(cx, cy + r + 20, tag, size=10, weight="bold", anchor="middle")
 
-    def pump_sump(self, cx, cy, tag=None, r=16):
+    def pump_sump(self, cx, cy, tag=None, r=16, basin_w=None):
         """Sump pump: centrifugal pump symbol seated over a sump/pit basin. Slurry
-        enters the basin from above; discharge exits the pump tip (cx+r+10, cy)."""
+        enters the basin from above (or its walls/bottom in the pit-fed
+        convention); discharge exits the pump tip (cx+r+10, cy). basin_w widens
+        the pit to the right of the pump (default 2r+16, the pump's own width)
+        for a sump that takes several inflows or carries a level transmitter on
+        its rim. Returns {"rim": (x0, x1, y), "bottom": (x0, x1, y)} - the rim
+        and floor spans a composing script lands pipes and leads on."""
         by = cy + r + 10
-        self.add(f'<path d="M {cx-r-8},{by} L {cx+r+8},{by} L {cx+r-4},{by+18} '
-                 f'L {cx-r+4},{by+18} Z" fill="{SHELL}" stroke="{EQ}" stroke-width="1.5"/>')
+        x0 = cx - r - 8
+        x1 = x0 + (basin_w if basin_w else 2 * r + 16)
+        self.add(f'<path d="M {x0},{by} L {x1},{by} L {x1-12},{by+18} '
+                 f'L {x0+12},{by+18} Z" fill="{SHELL}" stroke="{EQ}" stroke-width="1.5"/>')
         self.pump_centrifugal(cx, cy, tag=None, r=r)
         if tag:
             self.txt(cx, by + 36, tag, size=10, weight="bold", anchor="middle")
+        return {"rim": (x0, x1, by), "bottom": (x0 + 12, x1 - 12, by + 18)}
 
     def feeder_apron(self, x0, y0, x1, y1, tag=None):
         """Apron feeder: flat pan built from overlapping plate segments. Feed
