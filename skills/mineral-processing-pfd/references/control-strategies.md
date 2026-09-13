@@ -28,7 +28,7 @@ table lists only what that tier *adds*.
 |---|---|---|
 | **DRIVE SPEED** | Feeder, mill or pump variable-speed drive | `motor()` — returns its signal landing point; controller letters `SC`/`SIC` or the process controller (`WIC`, `LIC`) writing to the drive directly |
 | **VALVE** | Water (process, dilution, inlet) control valve | `cvalve()` |
-| **CRUSHER SETTING** | Closed-side setting (CSS) / hydroset | `ZIC` bubble with a `sig` ending on the crusher body — no dedicated primitive *(crushing rows: later ticket)* |
+| **CRUSHER SETTING** | Closed-side setting (CSS) / hydroset | `ZIC` bubble with a `sig` ending on the crusher body — no dedicated primitive; see "Drawing a crusher-setting loop" under Circuit 1 |
 | **MONITOR** | Transmitter + indicator/alarm only; **no final element** | Indicator bubble (`JI`, `PI`, `AI`); the narrative must say "monitor", not oversell it as a loop |
 
 ### ISA-5.1 letters (research §1, "ISA-5.1-2009 letters")
@@ -43,18 +43,53 @@ existing `pfd-generator` convention (master signal lands on the slave controller
 ### Loop tag numbering
 
 100-series for crushing, 200-series for grinding (SAG and ball mill/cyclone share the 200 range),
-matching the shipped examples' `LV-201` / `WIC-201` style. The `2xN` numbers in the tables below are
-the shipped example's assignments; SAG and ball-mill/cyclone loops share one sequence, so optional
-loops (mill speed, pebble crusher) take the next free number rather than a fixed one.
+matching the shipped examples' `LV-201` / `WIC-201` style. The `1xN` / `2xN` numbers in the tables
+below are the shipped example's assignments; SAG and ball-mill/cyclone loops share one sequence, so
+optional loops (mill speed, pebble crusher) take the next free number rather than a fixed one.
 
 ---
 
 ## Circuit 1 — Primary / secondary crushing with closed-circuit screen (research §2)
 
+The circuit the rows assume: ROM bin → apron feeder → primary crusher (gyratory or jaw) → conveyor →
+surge bin → bin feeder → screen; screen undersize is the stage product (belt scale on the product
+conveyor); screen oversize goes to the secondary cone crusher through its own feeder, and the cone
+product returns to the surge bin (forward closed circuit). Each feeder has exactly one controller
+writing to it — the basic tier has no cascades.
+
 ### Basic tier
 
-*Not yet written — a later ticket appends the rows here (crusher load → feeder speed, cavity level →
-feeder speed, CSS in setting or load mode as **one** controller, surge-bin level, belt-scale monitor).*
+| Loop | Tag scheme | Measured variable (ISA letters) | Controller | Manipulated variable → final element (class) | Objective | Cascade role | Drawing hint | Source |
+|---|---|---|---|---|---|---|---|---|
+| Primary crusher load | `JT/JIC-1x1` (power) or `IT/IIC` (current) | Primary crusher motor power/current (`JT`/`IT`) | `JIC` / `IIC` | Apron/vibrating feeder speed → feeder `motor` (**DRIVE SPEED**) | Keep the primary crusher loaded without stalling | Constraint/override at higher tiers | `JT` on a lead from the crusher body; `JIC` above it; one signal over to `motor(port="top")` on the ROM-bin feeder | §2.1 [MetsoCSH p.162 "crusher currents"] |
+| Secondary crusher cavity level | `LT/LIC-1x2` | Cone crusher cavity / feed-hopper level (`LT`) | `LIC` | Crusher feeder (or feed conveyor) speed → feeder `motor` (**DRIVE SPEED**) | Maintain choke feed ("full cavity") | Master of the level-to-feeder cascade at intermediate | `LT` on a lead from the bowl near its top; `LIC` beside it; signal to the `motor` of the feeder that feeds *this* crusher — not the surge-bin feeder | §2.1 [Hulthen2010 p.23; MetsoCSH p.17] |
+| Cone crusher setting (CSS) | `ZT/ZIC-1x3` — setting mode; `PT/PIC` or `JT/JIC` → `ZIC` as the *alternative* load mode | Mainshaft position = CSS (`ZT`); in load mode hydroset pressure (`PT`) or power (`JT`) | `ZIC` | Hydroset / mantle position → crusher body (**CRUSHER SETTING**) | Hold constant CSS ("setting mode") or constant pressure/power ("load mode") | Slave of the power/pressure override at intermediate | **One** controller, two selectable modes — never two loops. `ZT` on a lead from the bowl; `ZIC` beside it; its output `sig` ends on the crusher body low down (the hydroset end). Draw the mode the plant runs in and name it in the narrative; the other mode is a note, not a second bubble | §2.1 [Hulthen2010 p.23; MetsoCSH pp.66–67] |
+| Surge bin / screen feed level | `LT/LIC-1x4` | Surge bin level (`LT`) | `LIC` | Bin discharge (screen feed) feeder speed → feeder `motor` (**DRIVE SPEED**) | Keep the bin in range, steady screen feed | — | `LT` on a lead from the bin wall; `LIC` beside it; signal to `motor(port="right")` on the bin feeder | §2.1 [MetsoCSH p.162 "hopper and stockpile levels"] |
+| Product conveyor tonnage | `WT/WI-1x5` (`WQI` if totalised) | Belt-scale mass flow on the stage product conveyor (`WT`) | `WI` | — (**MONITOR**) | Measure stage yield; the measurement the intermediate feedforward and advanced optimiser use | — | `WT` on a lead from the conveyor belt, `WI` above it; no outgoing signal | §2.1 [Hulthen2010 p.i] |
+
+Caveats for the crushing basic tier:
+
+- **Setting mode and load mode are one controller.** The research file lists "cone crusher setting"
+  and "cone crusher load" as two rows because they measure different things, but the crusher
+  control unit runs "in one of two possible modes where either the CSS or the hydraulic pressure
+  is kept constant" [Hulthen2010 p.23] — draw one `ZIC`, pick the mode, state it. Mining crushers
+  are often run pressure/power-limited, so load mode is a defensible choice too; whichever is drawn,
+  the *override* of one by the other is an intermediate addition, not a basic loop.
+- **One feeder, one controller.** The cavity-level loop and the surge-bin-level loop must land on
+  different feeders (the crusher feeder and the bin/screen feeder respectively). If the flowsheet
+  has only one feeder between bin and crusher, the cavity-level loop takes it and the bin level is
+  drawn as an indicator (`LI`) — say so in the narrative.
+- **Belt scale is a monitor.** No final element at basic; it becomes the feedforward source at
+  intermediate.
+
+#### Drawing a crusher-setting loop
+
+There is no CSS primitive and none is needed. Put a `ZT` bubble on a `lead` from the crusher bowl,
+the `ZIC` beside or above it, and run the `ZIC`'s output `sig` so its arrowhead ends **on the
+crusher body** — low on the bowl, where the hydroset sits — with a small "CSS" label at the landing.
+The same convention serves the SAG pebble crusher (Circuit 2) and any tertiary crusher. Because the
+signal ends on equipment rather than on a `cvalve` or `motor`, this is the one final-element class a
+reader cannot identify from the symbol it lands on; the "CSS" label and the narrative row carry that.
 
 ### Intermediate tier — additions only
 
@@ -153,5 +188,17 @@ of equipment (e.g. the thickener level loop in the base-metal example) is still 
 ## Per-circuit tier note
 
 Because tiers can be mixed per circuit, the drawing must carry a note stating which tier each circuit
-was drawn at, e.g. `notes(..., "CONTROL STRATEGY", ["Crushing: basic", "Grinding: basic (assumed)"])`.
-This is the only place on the sheet that says what the drawn loops represent (ADR 0004).
+was drawn at. Format: one `CONTROL STRATEGY` notes block whose first bullet lists every circuit
+present as `<Circuit>: <tier>`, separated by ` | `, with `(assumed)` after any tier the user did not
+name — e.g.
+
+```python
+d.notes(x, y, "CONTROL STRATEGY", [
+    "Crushing: basic (assumed) | Grinding: basic (assumed) - no tier was named",
+    ...
+])
+```
+
+The separator is ASCII on purpose: `pid_lib.save()` writes in the platform encoding, so a non-ASCII
+`·` breaks the SVG on a managed Windows Python. This is the only place on the sheet that says what
+the drawn loops represent (ADR 0004), and the end-to-end smoke test asserts the line.

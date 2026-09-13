@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
-"""SAG -> ball mill -> hydrocyclone grinding circuit with a BASIC-tier control
-strategy (see references/control-strategies.md): the regulatory single loops
-only, drive-speed final elements drawn as a motor symbol, monitors as
-indicators, and the per-circuit tier note the drawing must carry (ADR 0004).
-Run from the examples/ directory; test_primitives.py imports build()."""
+"""Primary/secondary crushing stage -> SAG -> ball mill -> hydrocyclone with a
+BASIC-tier control strategy on both circuits (see
+references/control-strategies.md): the regulatory single loops only,
+drive-speed final elements drawn as a motor symbol, the crusher-setting loop
+as a ZIC ending on the crusher body, monitors as indicators, and the
+per-circuit tier note the drawing must carry (ADR 0004: tiers can be mixed
+per circuit, so the note names each one). Crushing loops are 100-series,
+grinding loops 200-series. Run from the examples/ directory;
+test_primitives.py imports build()."""
 import os
 import sys
 
@@ -12,17 +16,128 @@ from pid_lib import PID  # noqa: E402
 
 
 def build():
-    d = PID(1400, 980, border=True)
-    d.title("GRINDING CIRCUIT - BASIC CONTROL STRATEGY",
-            "SAG - ball mill - hydrocyclone closed circuit | regulatory (basic tier) loops, 200-series tags")
+    d = PID(1400, 1560, border=True)
+    d.title("CRUSHING + GRINDING CIRCUIT - BASIC CONTROL STRATEGY",
+            "Primary/secondary crushing with closed-circuit screen - SAG - ball mill - hydrocyclone | "
+            "regulatory (basic tier) loops, 100-series crushing / 200-series grinding tags")
 
-    Y = 460  # mill centreline; everything is planned around this row
+    # Two elevation bands: the crushing stage (row 1) above, grinding (row 2)
+    # below, joined by a transfer corridor that runs under row 1 and over row
+    # 2's tallest instrument bubbles - one y each, so nothing crosses.
+    Y1 = 210   # row 1 reference: ROM bin discharge is the stage's highest point
+    Y = 1040   # row 2: mill centreline; everything in that row is planned around it
+    Y_TRANSFER = Y - 310  # transfer corridor, 30 px clear of row 2's PSM label at Y-280
 
-    # ================================================================ feed side
-    # Crushed-ore stockpile above the reclaim feeder; the pile is kept well above
-    # the WIC-201 signal corridor at Y-150 so the signal never clips its slope.
+    # ======================================================= row 1: crushing
+    # ROM bin -> apron feeder -> gyratory primary, drawn as the vertical stack
+    # it really is (bin over feeder over crusher), discharging into a tunnel
+    # conveyor that lifts the product to the surge bin.
+    d.ore_bin(110, Y1 - 70, Y1 + 30, tag=None)
+    d.txt(110, Y1 - 82, "GE-101  ROM ore bin", size=10.5, weight="bold", anchor="middle")
+    d.pipe(f"M 110,{Y1+30} L 110,{Y1+55}", d.SOLIDS, arrow=True)
+    d.feeder_apron(90, Y1 + 55, 210, Y1 + 80)
+    d.txt(150, Y1 + 102, "FD-101", size=10.5, weight="bold", anchor="middle")
+    d.txt(150, Y1 + 114, "Apron feeder", size=9, fill=d.SUB, anchor="middle")
+    m_fd1 = d.motor(190, Y1 + 30, tag=None, port="top")
+    d.lead(190, Y1 + 43, 190, Y1 + 55)
+    d.pipe(f"M 200,{Y1+80} L 200,{Y1+100} L 312,{Y1+100} L 312,{Y1+120}", d.SOLIDS, arrow=True)
+    d.crusher_gyratory(330, Y1 + 110, Y1 + 200, tag=None)
+    d.txt(285, Y1 + 165, "CR-101", size=10.5, weight="bold", anchor="end")
+    d.txt(285, Y1 + 178, "Gyratory crusher", size=9, fill=d.SUB, anchor="end")
+    d.pipe(f"M 330,{Y1+200} L 330,{Y1+240} L 400,{Y1+240}", d.SOLIDS, arrow=True)
+    d.conveyor(400, Y1 + 240, 560, Y1 + 150, tag="CV-101")
+
+    # Surge (screen feed) bin with the secondary cone crusher stacked above it:
+    # both the primary product (CV-101) and the cone product drop into the bin,
+    # which is the closed circuit - bin -> feeder -> screen -> oversize -> cone
+    # -> bin. Screen undersize is the stage product.
+    d.pipe(f"M 560,{Y1+150} L 610,{Y1+150} L 610,{Y1+170}", d.SOLIDS, arrow=True)
+    d.ore_bin(640, Y1 + 170, Y1 + 270, tag=None)
+    d.txt(592, Y1 + 230, "GE-102", size=10.5, weight="bold", anchor="end")
+    d.txt(592, Y1 + 243, "Surge bin", size=9, fill=d.SUB, anchor="end")
+    d.pipe(f"M 640,{Y1+270} L 640,{Y1+295}", d.SOLIDS, arrow=True)
+    d.feeder_vibrating(620, Y1 + 295, 730, Y1 + 320)
+    d.txt(660, Y1 + 350, "FD-102", size=10.5, weight="bold", anchor="middle")
+    d.txt(660, Y1 + 362, "Screen feeder", size=9, fill=d.SUB, anchor="middle")
+    m_fd2 = d.motor(760, Y1 + 307, tag=None, port="right")
+    d.lead(747, Y1 + 307, 724, Y1 + 307)
+    d.pipe(f"M 716,{Y1+320} L 716,{Y1+340} L 800,{Y1+340} L 800,{Y1+355}", d.SOLIDS, arrow=True)
+    deck_ys = d.screen(780, Y1 + 355, 940, Y1 + 445, deck_count=2, wet=False, tag=None)
+    d.txt(875, Y1 + 462, "SD-101", size=10.5, weight="bold")
+    d.txt(875, Y1 + 475, "Screen, 2-deck, dry", size=9, fill=d.SUB)
+    # undersize (stage product) -> product conveyor -> transfer corridor -> stockpile
+    d.pipe(f"M 860,{Y1+445} L 860,{Y1+490} L 1000,{Y1+490}", d.SOLIDS, arrow=True)
+    d.conveyor(1000, Y1 + 490, 1150, Y1 + 400, tag="CV-103")
+    d.pipe(f"M 1150,{Y1+400} L 1190,{Y1+400} L 1190,{Y_TRANSFER} L 110,{Y_TRANSFER} L 110,{Y-240}", d.SOLIDS, arrow=True)
+    d.txt(650, Y_TRANSFER - 8, "Crushed ore to stockpile", size=9, fill=d.SUB, anchor="middle")
+    # both decks' oversize recycle to the cone crusher: bottom deck joins the
+    # top-deck line at a junction on the riser, one corridor above row 1 carries
+    # both to the crusher feeder. The riser is the one "up" run in the stage
+    # (a recycle conveyor, drawn as the base-metal example draws it).
+    riser_x = 980
+    d.pipe(f"M 940,{deck_ys[0]} L {riser_x},{deck_ys[0]} L {riser_x},{Y1-80} "
+           f"L 578,{Y1-80} L 578,{Y1-50}", d.SOLIDS, arrow=True)
+    d.pipe(f"M 940,{deck_ys[1]} L {riser_x},{deck_ys[1]} L {riser_x},{deck_ys[0]}", d.SOLIDS)
+    d.junction(riser_x, deck_ys[0])
+    d.txt(780, Y1 - 88, "Screen oversize to secondary crusher", size=9, fill=d.SUB, anchor="middle")
+    # crusher feeder -> cone crusher -> surge bin (vertical stack)
+    d.feeder_vibrating(560, Y1 - 50, 670, Y1 - 25)
+    d.txt(600, Y1 + 4, "FD-103", size=10.5, weight="bold", anchor="middle")
+    d.txt(600, Y1 + 16, "Crusher feeder", size=9, fill=d.SUB, anchor="middle")
+    m_fd3 = d.motor(700, Y1 - 38, tag=None, port="right")
+    d.lead(687, Y1 - 38, 664, Y1 - 38)
+    d.pipe(f"M 660,{Y1-25} L 660,{Y1+40}", d.SOLIDS, arrow=True)
+    d.crusher_cone(640, Y1 + 40, Y1 + 140, tag=None)
+    d.txt(700, Y1 + 108, "CR-102", size=10.5, weight="bold")
+    d.txt(700, Y1 + 121, "Cone crusher", size=9, fill=d.SUB)
+    d.pipe(f"M 640,{Y1+140} L 640,{Y1+170}", d.SOLIDS, arrow=True)
+
+    # ------------------------------------------------ crushing control loops
+    # JIC-101 primary crusher load (power) -> FD-101 apron feeder VSD (DRIVE SPEED)
+    d.bubble(420, Y1 + 160, "JT", "101", r=16)
+    d.lead(354, Y1 + 160, 404, Y1 + 160)
+    d.bubble(420, Y1 - 10, "JIC", "101", shared=True, r=20)
+    d.sig(f"M 420,{Y1+144} L 420,{Y1+10}")
+    d.sig(f"M 400,{Y1-10} L {m_fd1[0]},{Y1-10} L {m_fd1[0]},{m_fd1[1]}")
+
+    # LIC-102 cone crusher cavity level -> FD-103 crusher feeder VSD (DRIVE SPEED):
+    # the choke-feed loop, on the feeder that feeds THIS crusher
+    d.bubble(722, Y1 + 70, "LT", "102", r=16)
+    d.lead(671, Y1 + 70, 706, Y1 + 70)
+    d.bubble(790, Y1 + 70, "LIC", "102", shared=True, r=20)
+    d.sig(f"M 738,{Y1+70} L 770,{Y1+70}")
+    d.sig(f"M 790,{Y1+50} L 790,{m_fd3[1]} L {m_fd3[0]},{m_fd3[1]}")
+
+    # ZIC-103 cone crusher setting (CSS, setting mode) - CRUSHER SETTING: one
+    # controller whose output ends on the crusher body at the hydroset end. Load
+    # mode (PT/JT -> ZIC) is the alternative mode of this same controller, not
+    # a second loop.
+    d.bubble(562, Y1 + 90, "ZT", "103", r=16)
+    d.lead(613, Y1 + 90, 578, Y1 + 90)
+    d.bubble(490, Y1 + 90, "ZIC", "103", shared=True, r=20)
+    d.sig(f"M 546,{Y1+90} L 510,{Y1+90}")
+    d.sig(f"M 490,{Y1+110} L 490,{Y1+130} L 626,{Y1+130}")
+    d.txt(590, Y1 + 125, "CSS", size=8.5, fill=d.SUB, anchor="middle")
+
+    # LIC-104 surge bin level -> FD-102 screen feeder VSD (DRIVE SPEED)
+    d.bubble(732, Y1 + 220, "LT", "104", r=16)
+    d.lead(680, Y1 + 220, 716, Y1 + 220)
+    d.bubble(800, Y1 + 220, "LIC", "104", shared=True, r=20)
+    d.sig(f"M 748,{Y1+220} L 780,{Y1+220}")
+    d.sig(f"M 800,{Y1+240} L 800,{m_fd2[1]} L {m_fd2[0]},{m_fd2[1]}")
+
+    # WI-105 product belt scale on CV-103: monitor only (stage yield)
+    d.bubble(1040, Y1 + 400, "WT", "105", r=16)
+    d.lead(1040, Y1 + 466, 1040, Y1 + 416)
+    d.bubble(1040, Y1 + 340, "WI", "105", shared=True, r=20)
+    d.sig(f"M 1040,{Y1+384} L 1040,{Y1+360}")
+
+    # ======================================================= row 2: grinding
+    # Crushed-ore stockpile above the reclaim feeder, fed from the transfer
+    # corridor; the pile is kept well above the WIC-201 signal corridor at
+    # Y-150 so the signal never clips its slope.
     d.stockpile(110, Y - 170, tag=None)
-    d.txt(110, Y - 252, "Crushed ore stockpile", size=10.5, weight="bold", anchor="middle")
+    d.txt(190, Y - 215, "GE-103  Crushed ore stockpile", size=10.5, weight="bold")
     d.pipe(f"M 110,{Y-170} L 110,{Y-40}", d.SOLIDS, arrow=True)
     d.feeder_apron(70, Y - 40, 180, Y - 10)
     d.txt(100, Y + 15, "FD-201", size=10.5, weight="bold", anchor="middle")
@@ -154,15 +269,18 @@ def build():
     # ============================================================ sheet furniture
     # Per-circuit tier note (ADR 0004): the only place that says which control
     # tier the drawn loops represent.
-    d.notes(60, 760, "CONTROL STRATEGY", [
-        "Grinding: basic tier (assumed - no tier was named; intermediate/advanced add cascades, ratio, override, supervisory)",
+    Y_NOTES = Y + 300
+    d.notes(60, Y_NOTES, "CONTROL STRATEGY", [
+        "Crushing: basic (assumed) | Grinding: basic (assumed) - no tier was named; intermediate/advanced add cascades, ratio, override, supervisory",
+        "ZIC-103 holds CSS in setting mode; load mode (PT/JT -> ZIC) is the alternative mode of the same controller, not a second loop",
         "Sump level -> pump speed and cyclone feed density -> dilution water: chosen pairing, they cannot share the water valve",
-        "JI-204 / JI-209 (mill power), PI-207 (cyclone feed pressure), AI-208 (PSM) are monitors - indication only, no final element",
+        "WI-105 (belt scale), JI-204 / JI-209 (mill power), PI-207 (cyclone feed pressure), AI-208 (PSM) are monitors - no final element",
         "Feeder and pump speed loops terminate on the drive (M), not a valve; WIC-203 writes the setpoint of WIC-201",
     ])
-    d.notes(760, 760, "DESIGN BASIS / ASSUMPTIONS", [
+    d.notes(800, Y_NOTES, "DESIGN BASIS / ASSUMPTIONS", [
         "Conceptual only: no setpoints, tuning, controller or transmitter sizing, interlocks or alarms",
-        "Single SAG - ball mill line, fixed-speed mills, sump pump on VSD; loop tags 200-series (grinding)",
+        "Gyratory primary, cone secondary in forward closed circuit with a 2-deck dry screen; feeders on VSDs",
+        "Single SAG - ball mill line, fixed-speed mills, sump pump on VSD; loop tags 1xx crushing, 2xx grinding",
         "Not for construction - no equipment sizing, mass balance, or hazard review",
     ])
     d.legend([
@@ -170,8 +288,8 @@ def build():
         ("Ore slurry / pulp", d.ORE, False),
         ("Process / dilution water", d.BLUE, False),
         ("DCS signal", d.SIG, True),
-    ], y=926, x=60, density=True)
-    d.revision("Rev A | mineral-processing-pfd example", y=950)
+    ], y=Y_NOTES + 130, x=60, density=True)
+    d.revision("Rev B | mineral-processing-pfd example", y=Y_NOTES + 154)
     return d
 
 

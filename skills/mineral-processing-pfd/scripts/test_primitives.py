@@ -397,13 +397,17 @@ def _load_example(name):
 
 
 def test_example_grinding_circuit_control():
-    """Drawing-level: the shipped basic-tier grinding example builds end to end,
-    passes every structural invariant, carries the per-circuit tier note
-    (ADR 0004) and declares D on the legend because it draws a density loop."""
+    """Drawing-level: the shipped basic-tier crushing + grinding example builds
+    end to end, passes every structural invariant, carries the per-circuit
+    tier note naming BOTH circuits (ADR 0004: tiers can be mixed per circuit,
+    so the note must list each one), draws the crusher-setting loop as a ZIC
+    and declares D on the legend because it draws a density loop."""
     d = _load_example("build_grinding_circuit_control").build()
     standard_checks(d)
     text = "\n".join(d.o)
-    assert "Grinding: basic" in text, "per-circuit tier note missing"
+    assert "Crushing: basic (assumed) | Grinding: basic (assumed)" in text, \
+        "per-circuit tier note must list every circuit in the documented format"
+    assert ">ZIC<" in text, "crusher-setting (CSS) loop must be a ZIC controller"
     assert "D = density" in text, "density loop drawn but D not declared on the legend"
     assert any('class="motor"' in s for s in d.o), "drive-speed loops need a motor final element"
 
