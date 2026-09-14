@@ -133,12 +133,12 @@ class PID:
         into the receiving controller - there is no arrow=False, a software link
         without a direction is a defect. `d` is an orthogonal M/L path only
         (the circles are laid out along each straight segment)."""
-        pts = self._ml_points(d)
+        pts = self._path_points(d)
         self.add(f'<path class="softlink" d="{d}" fill="none" stroke="{SIG}" '
                  f'stroke-width="1.1" stroke-linejoin="round" marker-end="url(#aSig)"/>')
-        self._link_circles(pts, pitch, r, clear_end=12, cls="softlink-node")
+        self._link_circles(pts, pitch, r, clear_end=12)
 
-    def _ml_points(self, d):
+    def _path_points(self, d):
         pts = re.findall(r"[ML]\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)", d)
         if len(pts) < 2:
             raise ValueError("softlink path must be 'M x,y L x,y ...' with at least two points")
@@ -789,16 +789,13 @@ class PID:
         declaration for first letter D (Table 4.1 leaves it to the user's
         choice) - set it whenever the drawing carries a DT/DIC loop."""
         cx = x
-        for label, color, dashed in entries:
-            if dashed == "soft":
-                self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
-                         f'stroke="{color}" stroke-width="1.1"/>')
+        for label, color, style in entries:
+            dash = ' stroke-dasharray="7,5.5"' if style is True else ''
+            wgt = {True: 1.6, "soft": 1.1}.get(style, 2.8)
+            self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
+                     f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
+            if style == "soft":
                 self._link_circles([(cx, y), (cx + 45, y)], 14, 2.6, cls="swatch")
-            else:
-                dash = ' stroke-dasharray="7,5.5"' if dashed else ''
-                wgt = 1.6 if dashed else 2.8
-                self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
-                         f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
             self.txt(cx + 55, y + 5, esc(label), size=size, fill=SUB)
             cx += max(gap, 55 + text_width(label, size) + 40)
         if density:
