@@ -63,6 +63,8 @@ equipment by name or a simple per-drawing tag instead (see `CONTEXT.md`, "Equipm
 | Code | Title | Primitive | Notes |
 |---|---|---|---|
 | *(ISA-5.1)* | Motor / variable-speed drive | `motor(cx, cy, tag=None, r=13, port="top")` | The drawn **final element** of every DRIVE SPEED loop (feeder, mill, pump). Circle with an "M"; returns the `(x, y)` on its rim (`top`/`bottom`/`left`/`right`) that the controller's signal lands on. Body only — draw the `lead()` to the equipment and the `sig()` yourself. Never stand a `cvalve` in for a drive. See `control-strategies.md` |
+| *(ADR 0004, not an ISA symbol)* | Supervisory / optimising block (advanced control tier) | `supervisory_block(x0, y0, x1, y1, title, subtitle=None, n_ports=1)` | **One per circuit**, never one per loop and never the ISA-5.1 computer-function hexagon (ADR 0004 says why). Rounded rectangle with a bold title ("SAG MILL OPTIMISER (MPC)") and an optional second line; no loop tag. Returns `{"top", "bottom", "left", "right"}`, each a list of `n_ports` `(x, y)` points spaced along that edge — start every `softlink` on one of them. Body only: no signal stubs. See `control-strategies.md`, "Drawing the advanced tier" |
+| *(ISA-5.1 software / data link)* | Software link signal | `softlink(d, pitch=14, r=2.6)` | Thin solid line with small hollow circles along it, distinct from the dashed electrical `sig()`. **Always arrowed** — there is no `arrow=False` — and only ever drawn from a `supervisory_block` port to a controller's **setpoint port**, lettered `SP` at the arrowhead. `d` is an orthogonal `M x,y L x,y …` path (circles are laid along each straight segment). Put it in the legend as `(label, SIG, "soft")` |
 
 ## Out of scope for this symbol set
 
