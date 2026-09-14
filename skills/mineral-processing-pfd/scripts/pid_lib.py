@@ -782,14 +782,20 @@ class PID:
     def design_basis(self, cx, y, text, size=9.5):
         self.txt(cx, y, esc(text), size=size, fill=SUB, anchor="middle")
 
-    def legend(self, entries, y=886, x=60, gap=210, size=12, density=False):
+    def legend(self, entries, y=886, x=60, gap=210, size=12, density=False, row_h=24):
         """entries: list of (label, color, style) where style is False (solid
         process line), True (dashed electrical/DCS signal) or "soft" (software
         link, drawn as softlink() draws it). density=True appends the ISA-5.1
         declaration for first letter D (Table 4.1 leaves it to the user's
-        choice) - set it whenever the drawing carries a DT/DIC loop."""
-        cx = x
+        choice) - set it whenever the drawing carries a DT/DIC loop. Entries
+        that would run past the sheet border wrap onto a new row `row_h`
+        below; returns the y of the last row so the caller can place
+        revision() under it."""
+        cx, right = x, self.w - 40
         for label, color, style in entries:
+            need = max(gap, 55 + text_width(label, size) + 40)
+            if cx > x and cx + 55 + text_width(label, size) > right:
+                cx, y = x, y + row_h
             dash = ' stroke-dasharray="7,5.5"' if style is True else ''
             wgt = {True: 1.6, "soft": 1.1}.get(style, 2.8)
             self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
@@ -797,10 +803,13 @@ class PID:
             if style == "soft":
                 self._link_circles([(cx, y), (cx + 45, y)], 14, 2.6, cls="swatch")
             self.txt(cx + 55, y + 5, esc(label), size=size, fill=SUB)
-            cx += max(gap, 55 + text_width(label, size) + 40)
+            cx += need
         if density:
-            self.txt(cx, y + 5, "ISA letter D = density (user's choice, ISA-5.1 Table 4.1)",
-                     size=size - 1.5, fill=SUB)
+            decl = "ISA letter D = density (user's choice, ISA-5.1 Table 4.1)"
+            if cx > x and cx + text_width(decl, size - 1.5) > right:
+                cx, y = x, y + row_h
+            self.txt(cx, y + 5, decl, size=size - 1.5, fill=SUB)
+        return y
 
     def revision(self, text, y=890):
         self.txt(self.w - 55, y, esc(text), size=9, fill=SUB, anchor="end")

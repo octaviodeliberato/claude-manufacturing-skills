@@ -412,6 +412,23 @@ def test_legend_declares_density_letter():
     assert not any("D = density" in s for s in without_d.o), "no density loop, no declaration"
 
 
+def test_legend_wraps_instead_of_overflowing():
+    """A fifth entry plus the density declaration does not fit one row on the
+    default 1400-wide sheet: the legend must wrap onto a second row rather than
+    run past the border, and report the last row's y so the caller can place
+    the revision line under it."""
+    entries = [("Ore / dry solids (conveyed)", ORE, False), ("Ore slurry / pulp", ORE, False),
+               ("Process / dilution water", SIG, False), ("DCS signal", SIG, True),
+               ("Software link (setpoint)", SIG, "soft")]
+    d = PID()
+    last_y = d.legend(entries, y=886, density=True)
+    standard_checks(d)
+    xs = [float(re.search(r'x="(-?[\d.]+)"', s).group(1)) for s in d.o if s.startswith("<text")]
+    assert max(xs) < d.w - 40, f"legend text starts at {max(xs)}, past the border"
+    assert last_y > 886, "five entries + declaration must wrap to a second row"
+    assert PID().legend(entries[:3]) == 886, "three short entries stay on one row"
+
+
 def test_supervisory_block():
     """supervisory_block() is the drawn ADVANCED tier: one rounded rectangle per
     circuit (ADR 0004), body only. It must return at least one signal-port
@@ -513,6 +530,7 @@ def test_example_grinding_circuit_control():
 CONTROL_TESTS = [
     ("motor", test_motor),
     ("legend declares D = density", test_legend_declares_density_letter),
+    ("legend wraps instead of overflowing", test_legend_wraps_instead_of_overflowing),
     ("supervisory_block", test_supervisory_block),
     ("softlink always arrowed", test_softlink_always_has_an_arrowhead),
     ("legend renders software-link entry", test_legend_renders_software_link_entry),

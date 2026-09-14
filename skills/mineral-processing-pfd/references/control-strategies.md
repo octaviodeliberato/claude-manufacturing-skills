@@ -99,9 +99,9 @@ research §5–6)*. The drawing says exactly that and no more (ADR 0004):
   optimiser, APC, supervisory control); "advanced" named for one circuit applies to that circuit only.
   The per-circuit tier note reads `<Circuit>: advanced` and the narrative gains one row per link
   (`Loop tag` = the block title, `Tier` = advanced, `Manipulated variable` = the setpoint written).
-- **Legend.** Add `("Software link (setpoint)", SIG, "soft")` to `legend()`. A fifth entry pushes
-  the `D = density` declaration past the border at the default 1520-wide sheet — keep the labels
-  short or split the legend into two `legend()` rows rather than dropping the declaration.
+- **Legend.** Add `("Software link (setpoint)", SIG, "soft")` to `legend()`. With five entries plus
+  the `D = density` declaration the legend wraps onto a second row by itself; `legend()` returns the
+  last row's y — place `revision()` below that, not at a fixed offset.
 - **Routing.** Place the block in its own band above the circuit's controllers so every link drops
   onto a free port from above; give each link its own corridor y (outer ports higher) so links never
   cross each other. Links may cross a process line like any other signal (`layout-rules.md` §2), and
