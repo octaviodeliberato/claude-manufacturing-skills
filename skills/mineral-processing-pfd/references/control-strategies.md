@@ -17,7 +17,7 @@ reach through a search snippet are marked *(snippet)* there and are not relied o
 |---|---|---|
 | **basic** | Regulatory layer: single-loop PID on the primary process variables. The default when the user names no tier — assume it and say so. | Ordinary ISA-5.1 loops: transmitter → controller `bubble` → final element |
 | **intermediate** | Enhanced regulatory: cascade, ratio, feedforward and override/constraint loops *added on top of* the basic loops. | Masters landing on the setpoint port of the slave controllers; ratio/override/feedforward functions as `Y` bubbles — see "Drawing a cascade, ratio or override" below |
-| **advanced** | Supervisory/optimising layer (expert system or MPC) that writes setpoints down to the intermediate layer. Never drawn unless asked. | One `supervisory_block` per circuit + `softlink` signals to the controllers it drives *(primitives not yet shipped — later ticket)* |
+| **advanced** | Supervisory/optimising layer (expert system or MPC) that writes setpoints down to the intermediate layer. Never drawn unless asked. | One `supervisory_block` per circuit + `softlink` signals to the setpoint port of each controller it drives — see "Drawing the advanced tier" below |
 
 Tiers are **cumulative**: a higher tier never removes or replaces a lower-tier loop, so each tier's
 table lists only what that tier *adds*.
@@ -68,6 +68,44 @@ grinding example applies:
   circuit is a ring of process lines (sump → pump → cyclone → mill → sump) and the density and
   dilution-water instruments sit inside it while the particle-size analyser sits outside. Signal
   legs may never cross *each other* — re-route, and never drop a loop to avoid a crossing.
+
+### Drawing the advanced tier (supervisory block)
+
+Research §1 and §5: every supervisory product (Metso Grinding Optimizer, Andritz BrainWave, Honeywell
+Profit Controller, Mintek MillStar, FLS ProcessExpert, Sandvik ASRi, Metso IC70C) is a separate
+application, OPC-linked to the DCS, whose outputs are *setpoints* of existing regulatory or
+enhanced-regulatory controllers, with a watchdog fallback to DCS control. The drawing says exactly that
+and no more (ADR 0004):
+
+- **One `supervisory_block` per circuit**, never one per loop and never an ISA-5.1 computer-function
+  hexagon on each loop the optimiser touches. Title it by function — `"CRUSHER OPTIMISER"`,
+  `"SAG MILL OPTIMISER (MPC)"`, `"GRINDING CIRCUIT OPTIMISER (MPC)"` — and use the optional second
+  line for the technology or a one-phrase remit ("expert system", "MPC: writes setpoints to the
+  regulatory masters"). No loop tag: it is not an ISA instrument. Where the SAG and ball-mill/cyclone
+  circuits are drawn as one grinding circuit on one sheet, they get one block.
+- **Every link is a `softlink()`** from a port the block returns to the **setpoint port** of the
+  controller it drives, lettered `SP` beside the arrowhead exactly like a cascade master's leg. The
+  ISA-5.1 software/data-link style (thin line with small circles) is what tells a reader "this
+  setpoint comes from software, not from a field controller"; a dashed `sig()` here would read as
+  another cascade. `softlink` always carries an arrowhead — there is no un-arrowed form.
+- **The block drives the tier-2 masters, not the slaves.** Tiers are cumulative and *one master per
+  setpoint* still holds: the optimiser writes the load controller's setpoint, not the feed
+  controller's (which the load controller already owns); the PSE controller's setpoint, not the
+  density controller's. A slave whose setpoint port is already taken by a cascade master never gets
+  a second leg from the block. The crushing-circuit table lists the exceptions (the `ZIC` and `SIC`
+  have no tier-2 master of their own, so the block lands on them directly).
+- **Never drawn unasked.** Advanced is drawn only when the user names it (expert system, MPC,
+  optimiser, APC, supervisory control); "advanced" named for one circuit applies to that circuit only.
+  The per-circuit tier note reads `<Circuit>: advanced` and the narrative gains one row per link
+  (`Loop tag` = the block title, `Tier` = advanced, `Manipulated variable` = the setpoint written).
+- **Legend.** Add `("Software link (setpoint)", SIG, "soft")` to `legend()`. A fifth entry pushes
+  the `D = density` declaration past the border at the default 1520-wide sheet — keep the labels
+  short or split the legend into two `legend()` rows rather than dropping the declaration.
+- **Routing.** Place the block in its own band above the circuit's controllers so every link drops
+  onto a free port from above; give each link its own corridor y (outer ports higher) so links never
+  cross each other. Links may cross a process line like any other signal (`layout-rules.md` §2), and
+  the ring crossing described under Circuit 3 is expected for a link into a controller sitting
+  inside it.
 
 ### Loop tag numbering
 
@@ -141,9 +179,24 @@ Caveats for the crushing intermediate tier:
 - **No pebble/size/speed feedforward at crushing** — the only feedforward source in the research is
   the belt scale.
 
-### Advanced tier — supervisory block
+### Advanced tier — supervisory block (research §2.3, §5)
 
-*Not yet written.*
+| Block | Controlled variables (what it optimises) | Disturbance / constraint variables | Setpoints it writes → controller (final element class through the slave chain) | Objective | Drawing hint | Source |
+|---|---|---|---|---|---|---|
+| `CRUSHER OPTIMISER` — real-time optimiser over the secondary crusher (Hulthén's RTO; ASRi/IC70C "superior control system" interface) | Product yield: belt-scale mass flow of each product (`WT-1x5` and any other product belt scale) | Crusher power (`JT-1x3`) and hydroset pressure (`PT-1x3`) as constraints — "the optimal operating point [is] on the border of the constraint"; liner wear (through the `ZY` wear compensation) | CSS setpoint → `ZIC-1x3` (**CRUSHER SETTING**), through the `JY`/`PY` selector when the intermediate override is drawn so the `ZIC` keeps one setpoint leg; eccentric-speed setpoint → `SIC-1x6` (**DRIVE SPEED**) *only if a VSD is fitted* | Pick the CSS / speed pair that maximises product yield inside the power and pressure limits — "set-point selections automatically using a computer system ... real-time optimization"; +3.5 % yield vs fixed CSS, +4.2–6.9 % vs a good fixed speed | One block above the crusher stack; `softlink` to the `ZIC` (or `JY`) setpoint port and, if drawn, to the `SIC`; `WT-1x5` needs no extra leg (the block reads the DCS). On a fixed-speed crusher the block has one link and the narrative says why | §2.3 [Hulthen2010 pp.i, 37–38]; §5 [ASRi *(snippet)*; MetsoCSH] |
+
+Caveats for the crushing advanced tier:
+
+- **Direct landing is the exception.** The `ZIC` and `SIC` have no tier-2 master above them (the
+  intermediate override and wear compensation are selectors *into* the `ZIC` setpoint, not masters
+  with setpoints of their own), so the block lands on the `ZIC` setpoint leg — through the `JY`/`PY`
+  selector where one is drawn, so the `ZIC` still has exactly one setpoint leg.
+- **Hulthén's algorithm has no target setpoint** — it searches for the yield optimum — so the block
+  is an *optimiser*, not a controller with a setpoint; title it that way, not "MPC".
+- **Vendor "superior control system" integration (ASRi OPC to SCADA/DCS) is a search-snippet claim**
+  (research §6) — say "per vendor literature" in the narrative rather than stating it as fact.
+- The block does **not** write the feeder level loops (`LIC-1x2`, `LIC-1x4`) — no source drives
+  choke-feed level from an optimiser.
 
 ---
 
@@ -187,10 +240,24 @@ Caveats for the SAG intermediate tier:
 - **Feedforward and ball-addition rows are conditional** on equipment/measurements that exist on the
   drawing — the narrative says which were omitted and why, rather than inventing a transmitter.
 
-### Advanced tier — supervisory block
+### Advanced tier — supervisory block (research §3.3, §5)
 
-*Not yet written — one `supervisory_block` ("SAG MILL OPTIMISER (MPC)") with `softlink` to the feed
-`WIC`, speed `SIC` and water-ratio `FFY`.*
+| Block | Controlled variables (what it optimises) | Disturbance / constraint variables | Setpoints it writes → controller (final element class through the slave chain) | Objective | Drawing hint | Source |
+|---|---|---|---|---|---|---|
+| `SAG MILL OPTIMISER (MPC)` — expert system or MPC (Honeywell Profit Controller, Andritz BrainWave, Metso Grinding Optimizer) | Mill load / weight (`WT-2x3`), bearing pressure (`PT`), mill power (`JT-2x4`), generated pebbles (pebble-return `WT`), mill sound/acoustics | DVs: recirculated pebbles, feed granulometry / ore size (`AT`), ore composition; constraints: weight and power high limits, operator's maximum fresh-feed rate | Load setpoint → `WIC-2x3` (the load master, whose output already runs `JY-2x4` → `WIC-2x1` → feeder `motor`, **DRIVE SPEED**); mill speed setpoint → `SIC` → mill drive `motor` (**DRIVE SPEED**) *only on a variable-speed mill*; %solids / water-to-ore ratio setpoint → `FFY-2x2` → `FIC-2x2` → inlet water valve (**VALVE**) | "Stabilize mill load and power ... operate safely and consistently closer to constraints"; MVs "Feed Rate, Mill Velocity, %Solids"; +1.5–2 % throughput vs expert control alone, mill-weight std dev −84 % (Andritz), "around 3–4 % reduced SEC" (Honeywell) | One block above the SAG loops; `softlink` to the `WIC-2x3` setpoint port, the `FFY-2x2` setpoint port and, on a VSD mill, the `SIC`. Never to `WIC-2x1` (its setpoint is the `JY` output) and never to `FIC-2x2` (its setpoint is the `FFY` output). The power limit stays with `JIC-2x4`; the block reads it, it does not redraw it | §3.3 [HoneywellSAG Fig. 2 p.5, pp.4, 6; Forbes&Gough pp.7–8; Gough pp.6–7; MetsoGO p.1] |
+
+Caveats for the SAG advanced tier:
+
+- **The operator keeps the outer constraint** — "the maximum feed rate of fresh ore is set by the
+  operator" — so the narrative says the block optimises *within* an operator-set feed ceiling.
+- **Speed is conditional** on a VSD mill; a fixed-speed mill gives the block two links, and the
+  narrative says so. The mill sound / acoustic input is a DV the block reads, never a drawn loop.
+- **Vendor performance numbers are vendor claims**: the Andritz and Honeywell figures come from
+  vendor papers (read in full, research §6) — quote them as such. FLSmidth ProcessExpert / LoadIQ
+  claims are *search-snippet only* (research §5) and are not carried into this table.
+- **`SAG` and ball-mill/cyclone as one grinding circuit → one block.** When both are on one sheet and
+  the user says "advanced on grinding", draw a single `GRINDING CIRCUIT OPTIMISER (MPC)` with the
+  union of this row's and Circuit 3's links, not two blocks.
 
 ---
 
@@ -248,10 +315,25 @@ Caveats for the ball-mill/cyclone intermediate tier:
   the level transmitter's rim lead and the dilution-water inlet both sit on the ring's inside, which
   is what keeps the count at two.
 
-### Advanced tier — supervisory block
+### Advanced tier — supervisory block (research §4.3, §5)
 
-*Not yet written — one `supervisory_block` ("GRINDING CIRCUIT OPTIMISER (MPC)") with `softlink` to
-the feed `WIC`, water `FFY`/`FIC`, sump `LIC`, density `DIC` and pump `SIC`/`PIC`.*
+| Block | Controlled variables (what it optimises) | Disturbance / constraint variables | Setpoints it writes → controller (final element class through the slave chain) | Objective | Drawing hint | Source |
+|---|---|---|---|---|---|---|
+| `GRINDING CIRCUIT OPTIMISER (MPC)` — MPC with constraint handling (Mintek MillStar, Metso Grinding Optimizer, Le Roux & Craig's plant-wide MPC) | Product particle size / PSE (`AT-2x8`), cyclone feed density (`DT-2x6`), sump level (`LT-2x5`), cyclone feed pressure (`PT-2x7`), mill power / load (`JT`, `WT`), throughput | Constraints: sump level limits, cyclone feed pressure band (roping / choking); DVs: ore hardness and feed size, flotation-feed density demand from downstream | PSE setpoint → `AIC-2x8` (the PSM master, whose output already sets `DIC-2x6` → `LY` → `FIC` → dilution valve, **VALVE**); sump level setpoint → `LIC-2x5` → `PY-2x7` → pump `motor` (**DRIVE SPEED**); mill water ratio setpoint → the mill-inlet `FFY` → `FIC` → valve (**VALVE**) *only if the ball mill has its own water loop*; fresh-feed setpoint → the feed master (`WIC-2x3` in a SAG-fed circuit, the ball-mill `WIC` in a stand-alone one) | Two operating philosophies, chosen by the user or stated as an assumption: **hold PSE at setpoint and maximise throughput**, or **hold throughput at setpoint and push PSE towards an acceptable target**; keep "cyclone feed pressure and sump level ... inside their operating limit" | One block above the closed circuit; `softlink` to the `AIC-2x8` and `LIC-2x5` setpoint ports (and the feed / water masters when present). Never to `DIC-2x6` when the PSM cascade is drawn (its setpoint is the `AIC` output) and never to `FIC-2xN` (the `LY` output) — one master per setpoint. The pressure band stays with `PIC-2x7`; the block honours it as a constraint | §4.3 [LeRoux2019 pp.13, 39; Mintek pp.1–3; MetsoGO p.1] |
+
+Caveats for the ball-mill/cyclone advanced tier:
+
+- **Which philosophy is drawn does not change the links** — hold-PSE and hold-throughput differ in
+  which variable is the target and which is pushed; both write the same setpoints. State the chosen
+  philosophy in the block's second line or the narrative ("hold PSE, maximise throughput").
+- **The pairing chosen at basic still decides the chain**: with level → pump and density → water (the
+  shipped example) the level link lands on `LIC-2x5`, the PSE link on `AIC-2x8`. With the other
+  pairing the level link lands on the `LIC` that drives the water and the PSE link on the pump-side
+  master. Never re-pair at a higher tier.
+- **Downstream density cascade and the block are the same idea** — a flotation-feed density demand
+  is a DV or a target for the block, not a second master on `DIC-2x6` (one master per setpoint).
+- **Vendor claims**: the MillStar case study and Metso leaflet were read in full (research §6); the
+  "Mintek *(snippet)*" pressure-override row above is intermediate, not advanced, and is unaffected.
 
 ---
 

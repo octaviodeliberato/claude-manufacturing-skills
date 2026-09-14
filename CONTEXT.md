@@ -38,5 +38,13 @@ _Avoid_: Level (collides with the process variable), simple/complex
 The table that accompanies a drawn control strategy: one row per loop giving its tag, measured variable, manipulated variable and objective. What a reviewer checks the drawing against.
 _Avoid_: Control description, functional spec
 
+**Supervisory block**:
+The single drawn symbol for a circuit's advanced tier: one titled rounded rectangle per circuit ("SAG MILL OPTIMISER (MPC)") standing for the expert system / MPC / optimiser that writes setpoints down to the circuit's regulatory masters. Drawn only when the user asks for advanced control (ADR 0004).
+_Avoid_: Computer function (the ISA-5.1 hexagon, deliberately not used), APC bubble
+
+**Software link**:
+The ISA-5.1 software/data-link signal style (line with small circles) reserved for a supervisory block writing a setpoint to a controller's setpoint port. Visually distinct from the dashed DCS signal so a reader can tell a software-written setpoint from a field cascade.
+_Avoid_: Data link, soft signal
+
 **Final element**:
 What a controller ultimately moves. In comminution circuits it is usually a drive speed (feeder, mill, pump) or a crusher setting, not a control valve.

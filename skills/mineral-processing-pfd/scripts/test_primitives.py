@@ -52,6 +52,15 @@ def assert_signals_have_arrowheads(d):
             assert "marker-end" in s, f"signal line missing arrowhead: {s[:80]}"
 
 
+def assert_softlinks_have_arrowheads(d):
+    """Every software/data link must carry marker-end. The electrical guard above
+    keys on the dashed pattern and would silently skip a softlink, so this one
+    keys on the class the primitive stamps on every link it draws."""
+    for s in d.o:
+        if 'class="softlink"' in s:
+            assert "marker-end" in s, f"software link missing arrowhead: {s[:80]}"
+
+
 def assert_no_bare_text_paths(d):
     """Rule 4: text must be real <text>, never <path>/<use> glyph outlines standing
     in for a label. We only ever emit <text>, so this just guards against a future
@@ -64,6 +73,7 @@ def standard_checks(d):
     assert_valid_svg(d)
     assert_no_raster_images(d)
     assert_signals_have_arrowheads(d)
+    assert_softlinks_have_arrowheads(d)
     assert_no_bare_text_paths(d)
 
 
@@ -402,6 +412,67 @@ def test_legend_declares_density_letter():
     assert not any("D = density" in s for s in without_d.o), "no density loop, no declaration"
 
 
+def test_supervisory_block():
+    """supervisory_block() is the drawn ADVANCED tier: one rounded rectangle per
+    circuit (ADR 0004), body only. It must return at least one signal-port
+    coordinate, every port must sit on the block's own outline, and the title
+    must be real text."""
+    d = PID()
+    ports = d.supervisory_block(300, 100, 620, 160, "SAG MILL OPTIMISER (MPC)",
+                                subtitle="expert system / MPC", n_ports=3)
+    standard_checks(d)
+    rects = [s for s in d.o if s.startswith("<rect") and 'class="supervisory"' in s]
+    assert len(rects) == 1, "one rounded rectangle per block"
+    assert 'rx="' in rects[0], "block must be a ROUNDED rectangle, not a vessel or a hexagon"
+    assert ">SAG MILL OPTIMISER (MPC)<" in "\n".join(d.o), "title must be real <text>"
+    assert ">expert system / MPC<" in "\n".join(d.o), "subtitle must be real <text>"
+    flat = [pt for side in ports.values() for pt in side]
+    assert flat, "block must return at least one port coordinate"
+    assert len(ports["bottom"]) == 3, "n_ports ports per side"
+    for x, y in flat:
+        assert 300 <= x <= 620 and 100 <= y <= 160, f"port {x, y} outside the block bounds"
+        assert x in (300, 620) or y in (100, 160), f"port {x, y} not on the outline"
+    assert not any(s.startswith("<line") for s in d.o), "body only: no signal stubs"
+
+
+def test_softlink_always_has_an_arrowhead():
+    """softlink() is the ISA-5.1 software/data link: visually distinct from the
+    dashed electrical sig() and ALWAYS arrowed - there is no arrow=False."""
+    d = PID()
+    d.softlink("M 100,100 L 200,100 L 200,220")
+    standard_checks(d)
+    links = [s for s in d.o if 'class="softlink"' in s]
+    assert links, "softlink must stamp class=softlink so the guard can find it"
+    assert all("marker-end" in s for s in links)
+    assert not any('stroke-dasharray="7,5.5"' in s for s in d.o), \
+        "a software link must not reuse the electrical dash pattern"
+    assert any(s.startswith("<circle") for s in d.o), \
+        "software link is a line with small circles along it (ISA-5.1)"
+    # the guard is a real guard: strip the marker and it must fail
+    stripped = PID()
+    stripped.o = [s.replace(' marker-end="url(#aSig)"', "") for s in d.o]
+    try:
+        assert_softlinks_have_arrowheads(stripped)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("softlink arrowhead guard did not catch a missing marker")
+
+
+def test_legend_renders_software_link_entry():
+    """The legend must know the third line style ('soft') and draw it as the
+    link looks on the sheet, without stamping the swatch as a real softlink
+    (a swatch has no arrowhead and must not trip the guard)."""
+    d = PID()
+    d.legend([("DCS signal", SIG, True), ("Software link (supervisory setpoint)", SIG, "soft")])
+    standard_checks(d)
+    text = "\n".join(d.o)
+    assert ">Software link (supervisory setpoint)<" in text
+    assert not any('class="softlink"' in s for s in d.o), "legend swatch is not a signal"
+    swatches = [s for s in d.o if 'class="swatch"' in s]
+    assert any(s.startswith("<circle") for s in swatches), "soft swatch must show the circles"
+
+
 def _load_example(name):
     """Import examples/<name>.py as a module without running its __main__ save."""
     here = os.path.dirname(os.path.abspath(__file__))
@@ -442,6 +513,9 @@ def test_example_grinding_circuit_control():
 CONTROL_TESTS = [
     ("motor", test_motor),
     ("legend declares D = density", test_legend_declares_density_letter),
+    ("supervisory_block", test_supervisory_block),
+    ("softlink always arrowed", test_softlink_always_has_an_arrowhead),
+    ("legend renders software-link entry", test_legend_renders_software_link_entry),
     ("example: grinding_circuit_control end-to-end", test_example_grinding_circuit_control),
 ]
 

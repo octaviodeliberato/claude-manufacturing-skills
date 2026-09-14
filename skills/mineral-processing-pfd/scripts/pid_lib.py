@@ -7,10 +7,11 @@ docs/adr/0001-mineral-processing-pfd-forks-primitives.md for why this is a
 fork, not a shared import: skills are zipped and distributed one at a time,
 so a runtime cross-skill import isn't viable). The generic drawing
 primitives below (palette, markers, pipe/sig/bubble/cvalve/legend/vessel/
-agitator, PID scaffold) are unchanged from that fork point, with two
-additions for control strategies: motor() (ISA drive symbol) and the
-legend(density=True) declaration. Everything from "mineral-processing
-equipment" onward is new.
+agitator, PID scaffold) are unchanged from that fork point, with four
+additions for control strategies: motor() (ISA drive symbol), the
+legend(density=True) declaration, and - for the advanced tier (ADR 0004) -
+supervisory_block() plus the softlink() signal style it is wired up with.
+Everything from "mineral-processing equipment" onward is new.
 
 Usage:
     from pid_lib import PID
@@ -35,6 +36,7 @@ never fights the surrounding layout. Each primitive's docstring gives the
 coordinates of its notable connection points (feed, discharge, overflow...).
 """
 import math
+import re
 
 BLUE = "#1d4e89"    # process / wash water
 RUST = "#a34a28"    # steam / condensate
@@ -122,6 +124,40 @@ class PID:
         m = ' marker-end="url(#aSig)"' if arrow else ''
         self.add(f'<path d="{d}" fill="none" stroke="{SIG}" stroke-width="1.35" '
                  f'stroke-dasharray="7,5.5"{m}/>')
+
+    def softlink(self, d, pitch=14, r=2.6):
+        """ISA-5.1 software / data link: a thin solid line with small hollow
+        circles along it, the signal style for a supervisory block writing a
+        setpoint down to a controller (advanced tier, ADR 0004). Visually
+        distinct from the dashed electrical sig(). ALWAYS carries an arrowhead
+        into the receiving controller - there is no arrow=False, a software link
+        without a direction is a defect. `d` is an orthogonal M/L path only
+        (the circles are laid out along each straight segment)."""
+        pts = self._ml_points(d)
+        self.add(f'<path class="softlink" d="{d}" fill="none" stroke="{SIG}" '
+                 f'stroke-width="1.1" stroke-linejoin="round" marker-end="url(#aSig)"/>')
+        self._link_circles(pts, pitch, r, clear_end=12, cls="softlink-node")
+
+    def _ml_points(self, d):
+        pts = re.findall(r"[ML]\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)", d)
+        if len(pts) < 2:
+            raise ValueError("softlink path must be 'M x,y L x,y ...' with at least two points")
+        return [(float(x), float(y)) for x, y in pts]
+
+    def _link_circles(self, pts, pitch, r, clear_end=0.0, cls="softlink-node"):
+        """Hollow circles every `pitch` px along a polyline, none within
+        `clear_end` of the far end so the arrowhead stays clean."""
+        total = sum(math.hypot(x1 - x0, y1 - y0) for (x0, y0), (x1, y1) in zip(pts, pts[1:]))
+        s, seg_start = pitch / 2, 0.0
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            L = math.hypot(x1 - x0, y1 - y0)
+            while s <= seg_start + L and s <= total - clear_end:
+                t = (s - seg_start) / L if L else 0
+                cx, cy = x0 + (x1 - x0) * t, y0 + (y1 - y0) * t
+                self.add(f'<circle class="{cls}" cx="{cx:.1f}" cy="{cy:.1f}" r="{r}" '
+                         f'fill="#ffffff" stroke="{SIG}" stroke-width="1.1"/>')
+                s += pitch
+            seg_start += L
 
     def lead(self, x1, y1, x2, y2):
         """Thin solid process/impulse connection from equipment wall to a balloon."""
@@ -219,6 +255,32 @@ class PID:
         ports = {"top": (cx, cy - r), "bottom": (cx, cy + r),
                  "left": (cx - r, cy), "right": (cx + r, cy)}
         return ports[port]
+
+    def supervisory_block(self, x0, y0, x1, y1, title, subtitle=None, n_ports=1):
+        """Advanced control tier (ADR 0004): ONE supervisory / optimising block per
+        circuit - expert system or MPC - drawn as a rounded rectangle with a
+        title (e.g. "SAG MILL OPTIMISER (MPC)") and an optional second line,
+        never as an ISA computer-function hexagon per loop. Body only: connect
+        it with softlink() from a port this returns to the SETPOINT port of each
+        controller it drives. Returns {"top", "bottom", "left", "right"}, each a
+        list of `n_ports` (x, y) points spaced evenly along that edge, so several
+        links can leave one side without sharing a point."""
+        self.add(f'<rect class="supervisory" x="{x0}" y="{y0}" width="{x1-x0}" height="{y1-y0}" '
+                 f'rx="10" fill="#ffffff" stroke="{EQ}" stroke-width="2"/>')
+        self.add(f'<rect x="{x0+4}" y="{y0+4}" width="{x1-x0-8}" height="{y1-y0-8}" '
+                 f'rx="7" fill="none" stroke="{EQ}" stroke-width="0.8"/>')
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        if subtitle:
+            self.txt(cx, cy - 2, esc(title), size=11.5, weight="bold", anchor="middle", ls=0.4)
+            self.txt(cx, cy + 13, esc(subtitle), size=9.5, fill=SUB, anchor="middle")
+        else:
+            self.txt(cx, cy + 4, esc(title), size=11.5, weight="bold", anchor="middle", ls=0.4)
+        def spread(a, b):
+            return [a + (b - a) * (i + 1) / (n_ports + 1) for i in range(n_ports)]
+        return {"top": [(x, y0) for x in spread(x0, x1)],
+                "bottom": [(x, y1) for x in spread(x0, x1)],
+                "left": [(x0, y) for y in spread(y0, y1)],
+                "right": [(x1, y) for y in spread(y0, y1)]}
 
     def equip_tag(self, cx, y, tag, service=None, detail=None):
         """Equipment identification. Place in dead space; check against any line
@@ -721,15 +783,22 @@ class PID:
         self.txt(cx, y, esc(text), size=size, fill=SUB, anchor="middle")
 
     def legend(self, entries, y=886, x=60, gap=210, size=12, density=False):
-        """entries: list of (label, color, dashed). density=True appends the
-        ISA-5.1 declaration for first letter D (Table 4.1 leaves it to the
-        user's choice) - set it whenever the drawing carries a DT/DIC loop."""
+        """entries: list of (label, color, style) where style is False (solid
+        process line), True (dashed electrical/DCS signal) or "soft" (software
+        link, drawn as softlink() draws it). density=True appends the ISA-5.1
+        declaration for first letter D (Table 4.1 leaves it to the user's
+        choice) - set it whenever the drawing carries a DT/DIC loop."""
         cx = x
         for label, color, dashed in entries:
-            dash = ' stroke-dasharray="7,5.5"' if dashed else ''
-            wgt = 1.6 if dashed else 2.8
-            self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
-                     f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
+            if dashed == "soft":
+                self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
+                         f'stroke="{color}" stroke-width="1.1"/>')
+                self._link_circles([(cx, y), (cx + 45, y)], 14, 2.6, cls="swatch")
+            else:
+                dash = ' stroke-dasharray="7,5.5"' if dashed else ''
+                wgt = 1.6 if dashed else 2.8
+                self.add(f'<line class="swatch" x1="{cx}" y1="{y}" x2="{cx+45}" y2="{y}" '
+                         f'stroke="{color}" stroke-width="{wgt}"{dash}/>')
             self.txt(cx + 55, y + 5, esc(label), size=size, fill=SUB)
             cx += max(gap, 55 + text_width(label, size) + 40)
         if density:
