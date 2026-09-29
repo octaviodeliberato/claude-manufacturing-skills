@@ -1,6 +1,6 @@
 # Chemical Manufacturing Skills for Claude
 
-By Scott Duncan. Reach me on LinkedIn here: https://www.linkedin.com/in/s-r-duncan/
+By Scott Duncan. Reach me on LinkedIn here: https://www.linkedin.com/in/s-r-duncan/.View my website here: https://scottduncanai.com/
 
 A collection of [Claude Skills](https://code.claude.com/docs/en/skills) that encode chemical manufacturing engineering practices so that Claude produces work a practicing engineer would actually accept, rather than something that merely looks plausible.
 
