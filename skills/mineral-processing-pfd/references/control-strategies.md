@@ -28,7 +28,8 @@ table lists only what that tier *adds*.
 |---|---|---|
 | **DRIVE SPEED** | Feeder, mill or pump variable-speed drive | `motor()` — returns its signal landing point; controller letters `SC`/`SIC` or the process controller (`WIC`, `LIC`) writing to the drive directly |
 | **VALVE** | Water (process, dilution, inlet) control valve | `cvalve()` |
-| **CRUSHER SETTING** | Closed-side setting (CSS) / hydroset | `ZIC` bubble with a `sig` ending on the crusher body — no dedicated primitive; see "Drawing a crusher-setting loop" under Circuit 1 |
+| **CRUSHER SETTING** | Closed-side setting (CSS) of a **hydraulic-setting** cone (hydroset, moved under load) | `ZIC` bubble with a `sig` ending on the crusher body — no dedicated primitive; see "Drawing a crusher-setting loop" under Circuit 1 |
+| **CRUSHER SETTING (BATCH)** | CSS of a **fixed-shaft** cone (bowl turned by the ring gear, chamber empty) | `ZC` sequence with a `sig` ending on the adjustment-ring `motor()`; see "Fixed-shaft cone crushers" under Circuit 1 |
 | **MONITOR** | Transmitter + indicator/alarm only; **no final element** | Indicator bubble (`JI`, `PI`, `AI`); the narrative must say "monitor", not oversell it as a loop |
 
 ### ISA-5.1 letters (research §1, "ISA-5.1-2009 letters")
@@ -125,6 +126,10 @@ conveyor); screen oversize goes to the secondary cone crusher through its own fe
 product returns to the surge bin (forward closed circuit). Each feeder has exactly one controller
 writing to it — the basic tier has no cascades.
 
+The CSS rows in the three tier tables below assume a **hydraulic-setting** cone. For a
+**fixed-shaft** cone, the CSS rows are replaced as described in "Fixed-shaft cone crushers" at the
+end of this circuit. Every other row stays the same.
+
 ### Basic tier
 
 | Loop | Tag scheme | Measured variable (ISA letters) | Controller | Manipulated variable → final element (class) | Objective | Cascade role | Drawing hint | Source |
@@ -199,6 +204,44 @@ Caveats for the crushing advanced tier:
 - The block does **not** write the feeder level loops (`LIC-1x2`, `LIC-1x4`) — no source drives
   choke-feed level from an optimiser.
 
+### Fixed-shaft cone crushers (Symons family, Metso HP)
+
+**Source:** field information from a plant running fixed-shaft cones (2026), not the research file; see ADR 0005. A fixed-shaft cone
+sets its CSS by turning the bowl on its thread. A hydraulic motor drives the ring gear, and the bowl
+only turns with the **chamber empty** and the **clamping pressure released**. Nothing moves the CSS
+under load, so the CSS is set in **batches** during a scheduled stop. That rules out the continuous
+`ZIC`, setting and load modes, the override that opens the CSS, and continuous wear compensation.
+Overload is relieved passively by the tramp-release cylinders and accumulators. Their pressure
+spikes are the ring-bounce signal, and the only thing control can do about them is cut the feed.
+
+Replace the CSS rows of the three tier tables with these:
+
+| Tier | Replaces | Loop | Tag scheme | Final element (class) | Drawing hint |
+|---|---|---|---|---|---|
+| basic | Cone crusher setting (CSS) | Adjustment sequence: bowl-rotation count → computed CSS → batch adjustment | `ZT-1x3` (pulses from an inductive sensor on the ring-gear teeth, or an encoder on the hydraulic motor) → `ZY-1x3` (CSS = calibrated zero + pulses × mm per pulse) → `ZC-1x3` (sequence); `PT` on the clamping circuit (next free number) into the `ZC` | Ring-gear hydraulic motor, open/close, plus clamp release → `motor()` beside the bowl top (**CRUSHER SETTING (BATCH)**) | `motor` touching the bowl top with a short lead and a small "ring gear" label; `ZT` and clamp `PT` on leads from the bowl; `ZY` labelled "CSS calc."; `ZC` output lands on the `motor`. Only one controller writes the motor, so this is not a cascade |
+| intermediate | Power/pressure override on the CSS controller | Tramp-release pressure limit on feed | `PT/PIC-1x3` → the crusher feeder's low selector (`JY-1x2`) | Feeder speed (**DRIVE SPEED**), through the existing level-to-feeder cascade | `PIC` output goes into the `JY` beside the `JIC` power constraint and is labelled "relief". When the crusher has **no feeder of its own** (it is gravity-fed from a screen), draw `PI` with a `PAH` label instead and say why in the narrative: cutting an upstream feeder costs throughput at a stage that may be the bottleneck |
+| intermediate | Wear compensation of CSS | Wear estimate → adjustment request | `ZY-1x3` also estimates wear between calibrations from hours, tonnage and no-load power | — (it raises a request for the next window; it never writes a setpoint) | Not a separate bubble. Write "CSS calc. + wear" beside the `ZY`, or put it in the notes |
+| advanced | CSS setpoint → `ZIC` | CSS target for the next window | Optimiser → `ZC-1x3` | **CRUSHER SETTING (BATCH)** | `softlink` into the `ZC` labelled "CSS target", not `SP`. The narrative says the CSS changes at most once per window |
+
+Caveats for fixed-shaft crushers:
+
+- **The adjustment window is a scheduled stop.** Ask which stop the plant uses, for example a daily
+  stop of the crushing stage. A crusher with its own feeder can also be adjusted outside the window
+  by stopping that feeder. A gravity-fed crusher can only be adjusted in the window.
+- **The sequence's permissives are stated in the narrative and not drawn**, because interlocks are
+  out of scope: feeder stopped, chamber empty (low cavity level, no-load power, minimum time), clamp
+  released, then rotate, re-clamp, confirm pressure and release the feed.
+- **The vendor supplies the calibration, and it is a pending item.** List the mm-per-pulse factor
+  and the zero procedure as items to confirm with the crusher vendor. The zero is typically found by
+  closing the bowl onto the mantle with the crusher empty and running, then checking with lead. Do
+  not quote numbers. A run-time × mm relation (one per direction, recalibrated) is a fallback when no
+  pulse sensor is fitted.
+- **Hulthén's +3.5 % does not carry over.** It was measured with the CSS moved under load. With a
+  batch CSS the optimiser chooses the next window's setting, so drop the figure or state why it does
+  not apply.
+- **A pebble crusher of this family** (Circuit 2) follows the same rules: its power and pressure
+  limits act on the pebble feed, not on the CSS.
+
 ---
 
 ## Circuit 2 — SAG mill (research §3)
@@ -212,7 +255,7 @@ Caveats for the crushing advanced tier:
 | Mill load | `WT/WIC-2x3` (load cells) or `PT/PIC-2x3` (bearing pressure) | Mill weight or bearing oil pressure | `WIC` / `PIC` | Feed-rate setpoint of the fresh-feed `WIC` → feeder `motor` through it (**DRIVE SPEED**) | Keep mill load in its target range | Master over the fresh-feed loop | Transmitter on a lead from the shell; controller beside the feed `WIC`; one horizontal signal landing on the feed `WIC`, marked "SP" | §3.1, §3 key statements [Forbes&Gough pp.6–7; LeRoux2019 p.10] |
 | Mill power | `JT/JI-2x4` | Motor power kW (`JT`) | `JI` (+ high alarm) | — (**MONITOR**) | Do not exceed maximum power | — | `JT` on a lead from the shell, `JI` above it; no outgoing signal | §3.1 [Forbes&Gough p.6] |
 | Mill speed *(only if VSD)* | `ST/SIC` (next free 200-series number) | Fraction of critical speed (`ST`) | `SIC` | Mill drive VSD → mill `motor` (**DRIVE SPEED**) | Operator-set speed target | — | `motor` on the mill trunnion drive end; omit entirely on a fixed-speed mill and say so | §3.1 [LeRoux2019 p.37] |
-| Pebble crusher *(optional)* | `JT/JIC` or `PT/PIC` → `ZIC` (next free number) | Crusher power or hydroset pressure | `JIC`/`PIC` → `ZIC` | CSS (**CRUSHER SETTING**) | Run in power/pressure-limited mode | — | `ZIC` with a `sig` ending on the crusher body | §3.1 [Hulthen2010 p.23] |
+| Pebble crusher *(optional)* | `JT/JIC` or `PT/PIC` → `ZIC` (next free number) | Crusher power or hydroset pressure | `JIC`/`PIC` → `ZIC` | CSS (**CRUSHER SETTING**) | Run in power/pressure-limited mode | — | `ZIC` with a `sig` ending on the crusher body (hydraulic-setting cone); on a fixed-shaft cone, follow "Fixed-shaft cone crushers" in Circuit 1 | §3.1 [Hulthen2010 p.23] |
 | Pebble recycle tonnage *(optional)* | `WT/WI` (next free number) | Belt scale on pebble return | `WI` | — (**MONITOR**) | Measurement for feedforward at higher tiers | — | Indicator only | §3.1 [Gough p.7; HoneywellSAG p.5] |
 
 Caveats for the SAG basic tier:
