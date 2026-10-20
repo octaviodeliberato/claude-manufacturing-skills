@@ -48,3 +48,7 @@ _Avoid_: Data link, soft signal
 
 **Final element**:
 What a controller ultimately moves. In comminution circuits it is usually a drive speed (feeder, mill, pump) or a crusher setting, not a control valve.
+
+**Adjustment family**:
+How a cone crusher's closed-side setting (CSS) is moved. **Hydraulic-setting** cones (hydroset, floating shaft) move it under load, so the CSS is a continuous loop (`ZIC`). **Fixed-shaft** cones (Symons family, Metso HP) turn the bowl on its thread through the ring gear, only with the chamber empty, so the CSS is set in batches by a sequence (`ZC`) (ADR 0005).
+_Avoid_: Crusher type (the family is about the setting mechanism, not the crushing action)
